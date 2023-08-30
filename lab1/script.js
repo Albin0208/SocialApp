@@ -59,8 +59,8 @@ function createTweetCard(tweet) {
   checkboxInput.classList.add('form-check-input');
   checkboxInput.type = 'checkbox';
   checkboxInput.value = '';
-  checkboxInput.addEventListener('change', readTweet);
-  checkboxInput.id = 'flexCheckDefault';
+  checkboxInput.addEventListener('change', readTweet, tweet.id);
+  checkboxInput.id = tweet.id + 'checkbox';
 
   bodyDiv.appendChild(contentParagraph);
   bodyDiv.appendChild(checkboxInput);
@@ -76,8 +76,13 @@ function createTweetCard(tweet) {
   return cardDiv;
 }
 
-function readTweet(id) {
-  console.log("Read")
+function readTweet(event) {
+  if (!event.target.checked) {
+    document.getElementById(event.target.id.replace('checkbox', '')).classList.remove('bg-success');
+  } else
+    document.getElementById(event.target.id.replace('checkbox', '')).classList.add('bg-success');
+
+    // TODO Update Tweet with read status
 }
 
 
