@@ -31,6 +31,14 @@ function getTweets() {
 function formatDate(timestamp) {
   const date = new Date(timestamp);
 
+  // Alternative date and time format
+  // return `${date.toISOString().substring(0, 10)} ${date.toLocaleTimeString("se-SE", {
+  //           hour: "2-digit",
+  //           minute: "2-digit",
+  //           timeZone: "Europe/Stockholm",
+  //           hour12: false,
+  //         })}`;
+
   return `${date.toISOString().substr(0, 16).replace('T', ' ')}`;
 }
 
