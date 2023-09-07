@@ -4,6 +4,8 @@ import router from './router.js';
 const app = express();
 const port = 5000;
 
+app.use(express.json()) 
+
 // Use the router middleware
 app.use(router);
 

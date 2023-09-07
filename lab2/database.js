@@ -1,34 +1,47 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 let client;
 let db;
 
-function connectToDatabase(config, callback) {
-  if (db) return;
-
-  let uri;
-	if(config.user){
-		uri = `mongodb://${config.user}:${config.pass}@${config.host}/${config.options || ''}`;
-	} else {
-		uri = `mongodb://${config.host}/${config.options || ''}`;
-	}
-	client = new MongoClient(uri);
-	db = client.db(config.db);
-	callback && callback();
-
+function connectToDatabase() {
+	client = new MongoClient('mongodb://localhost:27017');
+	db = client.db('tdp013');
+	return db;
 }
 
-function closeDatabaseConnection() {
-	if(client){
-		client.close();
-		db = null;
-	}
-	callback && callback();
+async function getAll() {
+	if (!db) await connect();
 
+	return await db.collection('tweets').find({}).toArray();
 }
 
-function getDatabase() {
-  return db;
+async function getOne(id) {
+	// Check if the id is valid
+	if (!ObjectId.isValid(id)) return null;
+
+	if (!db) await connect();
+
+	const result = await db.collection('tweets').find({ _id: new ObjectId(id) }).toArray();
+	return result[0];
 }
 
-export { connectToDatabase, closeDatabaseConnection, getDatabase };
+async function insertOne(tweet) {
+	if (!db) await connect();
+
+	return await db.collection('tweets').insertOne(tweet);
+}
+
+async function update(tweet) {
+	if (!ObjectId.isValid(tweet._id)) return null;
+
+	if (!db) await connect();
+
+	return await db.collection('tweets').updateOne({ _id: new ObjectId(tweet._id) }, { $set:{ read: tweet.read }});
+}
+
+async function connect() {
+	client = await MongoClient.connect('mongodb://localhost:27017');
+	db = client.db('tdp013');
+}
+
+export { getAll, getOne, insertOne, update, connect, connectToDatabase };
