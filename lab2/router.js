@@ -3,75 +3,82 @@ import { getAll, getOne, insertOne, update, connect } from './database.js';
 
 const router = express.Router();
 
+function logError(err) {
+  console.error(err);
+}
+
+// Get all messages
 router.route('/messages')
   .get(async (req, res) => {
-    const tweets = await getAll();
-
-    res.status(200).json({ tweets: tweets });
+    try {
+      const tweets = await getAll();
+      res.status(200).json({ data: tweets });
+    } catch (error) {
+      logError(error);
+      res.status(500).json({ error: 'Failed to fetch messages', message: error.message });
+    }
   })
   .post(async (req, res) => {
-    // Validate req.body
-    if (!req.body.message || req.body.message.length > 140)
-      return res.status(500).json({ 
-        message: 'Error: Wrong message length, expected message to be between 1 and 140 characters' 
-      });
-
-      if (!req.body.author)
-      return res.status(500).json({ 
-        message: 'Error: Expected an author' 
-      });
-
-      // TODO Create a timestamp, used for testing
-      req.body.timestamp = Date.now();
-
-      // Check if the timestamp is valid
-      if (new Date(req.body.timestamp) == 'Invalid Date') {
-        return res.status(500).json({ 
-          message: 'Error: Invalid timestamp' 
-        });
+    // Deconstruct the message object
+    const { message, author, read, timestamp } = req.body;
+  
+    // Validate message, author, and timestamp
+    if (!message || message.length > 140 || !author || !timestamp) {
+      return res.status(500).json({ error: 'Invalid message, author, or timestamp' });
+    }
+  
+    // Validate read value
+    if (typeof read !== 'boolean') {
+      return res.status(500).json({ error: 'Invalid read value' });
+    }
+  
+    try {
+      const result = await insertOne(req.body);
+      if (result.acknowledged) {
+        res.status(201).json({ data: { id: result.insertedId } });
+      } else {
+        throw new Error('Failed to create message');
       }
-
-    const result = await insertOne(req.body);
-    if (!result.acknowledged)
-      return res.status(500).json({ message: 'Error: Could not create new message' });
-
-    res.status(200).json({ id: result.insertedId });
+    } catch (error) {
+      logError(error);
+      res.status(500).json({ error: 'Could not create new message', message: error.message });
+    }
   });
 
 router.route('/message/:id')
   .get(async (req, res) => {
-    const tweet = await getOne(req.params.id);
-    if (!tweet) 
-      return res.status(404).json({ message: `Error: Message id: ${req.params.id} not found` });
-
-    res.status(200).json({ tweet: tweet });
-  })
-  .patch(async(req, res) => {
-    if (!req.body.hasOwnProperty('read'))
-      return res.status(500).json({ 
-        message: 'Error: Expected a read boolean' 
-      });
-
-    if (typeof req.body.read !== 'boolean')
-      return res.status(500).json({ 
-        message: 'Error: Expected a read to have a boolean value'
-      });
-
-      try {
-        await update({ _id: req.params.id, read: req.body.read });
-      } catch (err) {
-        return res.status(500).json({ message: 'Error: Could not update message' });
+    try {
+      const tweet = await getOne(req.params.id);
+      if (!tweet) {
+        return res.status(404).json({ error: `Message id: ${req.params.id} not found` });
       }
+      res.status(200).json({ data: tweet });
+    } catch (error) {
+      logError(error);
+      res.status(500).json({ error: 'Failed to fetch message', message: error.message });
+    }
+  })
+  .patch(async (req, res) => {
+    if (typeof req.body.read !== 'boolean') {
+      return res.status(500).json({ error: 'Invalid read value' });
+    }
 
-    res.status(200).json({ message: `Message id: ${req.params.id} updated` });
+    try {
+      await update({ _id: req.params.id, read: req.body.read });
+      res.status(200).json({ message: `Message id: ${req.params.id} updated` });
+    } catch (error) {
+      logError(error);
+      res.status(500).json({ error: 'Could not update message', message: error.message });
+    }
   });
 
+// Catch-all route for invalid routes and methods
 router.route('*')
   .get((req, res) => {
-    res.status(404).json({ message: 'Error: not a valid route' });
+    res.status(404).json({ error: 'Not Found' });
   })
   .all((req, res) => {
-    res.status(405).json({ message: 'Error: Invalid method', method: req.method });
+    res.status(405).json({ error: 'Method Not Allowed', method: req.method });
   });
 
 export default router;

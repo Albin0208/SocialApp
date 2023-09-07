@@ -3,45 +3,63 @@ import { MongoClient, ObjectId } from 'mongodb';
 let client;
 let db;
 
-function connectToDatabase() {
-	client = new MongoClient('mongodb://localhost:27017');
-	db = client.db('tdp013');
-	return db;
+async function connect() {
+  try {
+    if (!client) {
+      client = await MongoClient.connect('mongodb://127.0.0.1:27017');
+      db = client.db('tdp013');
+    }
+  } catch (error) {
+    console.error('Failed to connect to the database:', error);
+    throw error; // Rethrow the error for the caller to handle
+  }
 }
 
 async function getAll() {
-	if (!db) await connect();
-
-	return await db.collection('tweets').find({}).toArray();
+  try {
+    await connect();
+    return await db.collection('tweets').find({}).toArray();
+  } catch (error) {
+    console.error('Failed to fetch all tweets:', error);
+    throw error;
+  }
 }
 
 async function getOne(id) {
-	// Check if the id is valid
-	if (!ObjectId.isValid(id)) return null;
-
-	if (!db) await connect();
-
-	const result = await db.collection('tweets').find({ _id: new ObjectId(id) }).toArray();
-	return result[0];
+  try {
+		console.log("pre search");
+    if (!ObjectId.isValid(id)) return null;
+    await connect();
+		console.log("search");
+    return await db.collection('tweets').findOne({ _id: new ObjectId(id) });
+  } catch (error) {
+    console.error('Failed to fetch a tweet by ID:', error);
+    throw error;
+  }
 }
 
 async function insertOne(tweet) {
-	if (!db) await connect();
-
-	return await db.collection('tweets').insertOne(tweet);
+  try {
+    await connect();
+    return await db.collection('tweets').insertOne(tweet);
+  } catch (error) {
+    console.error('Failed to insert a tweet:', error);
+    throw error;
+  }
 }
 
 async function update(tweet) {
-	if (!ObjectId.isValid(tweet._id)) return null;
-
-	if (!db) await connect();
-
-	return await db.collection('tweets').updateOne({ _id: new ObjectId(tweet._id) }, { $set:{ read: tweet.read }});
+  try {
+    if (!ObjectId.isValid(tweet._id)) return null;
+    await connect();
+    return await db.collection('tweets').updateOne(
+      { _id: new ObjectId(tweet._id) },
+      { $set: { read: tweet.read } }
+    );
+  } catch (error) {
+    console.error('Failed to update a tweet:', error);
+    throw error;
+  }
 }
 
-async function connect() {
-	client = await MongoClient.connect('mongodb://localhost:27017');
-	db = client.db('tdp013');
-}
-
-export { getAll, getOne, insertOne, update, connect, connectToDatabase };
+export { getAll, getOne, insertOne, update, connect };
