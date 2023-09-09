@@ -22,6 +22,11 @@ describe("server API test", () => {
     purgeDatabase();
   });
 
+  after(done => {
+    // CLose the server when done
+    server.close(() => done());
+  });
+
   describe("GET /messages", () => {
     it("/GET. Get all messages should return 200 and data of type array", done => {
       superagent.get(api + "/messages").end((err, res) => {
@@ -239,10 +244,5 @@ describe("server API test", () => {
         done();
       });
     });
-  });
-
-  after(done => {
-    console.log("Done");
-    server.close(() => done());
   });
 });
