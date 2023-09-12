@@ -16,7 +16,7 @@ function logError(err) {
 // Get all messages
 router
   .route("/messages")
-  .get(async (req, res) => {
+  .get((req, res) => {
     getAll()
       .then(tweets => {
         res.status(200).json({ data: tweets });
@@ -28,7 +28,7 @@ router
           .json({ error: "Failed to fetch messages", message: error.message });
       });
   })
-  .post(async (req, res) => {
+  .post((req, res) => {
     // Deconstruct the message object
     const { message, author, read, timestamp } = req.body;
 
@@ -69,7 +69,7 @@ router
 
 router
   .route("/message/:id")
-  .get(async (req, res) => {
+  .get((req, res) => {
     getOne(req.params.id)
       .then(tweet => {
         if (!tweet) {
