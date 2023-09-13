@@ -2,6 +2,8 @@ import superagent from "superagent";
 import assert from "assert";
 import { startServer } from "../server.js";
 import { setDbForTesting, purgeDatabase, insertOne } from "../database.js";
+import { describe } from "mocha";
+import { escape } from "querystring";
 
 let server;
 let api = "http://localhost:5000";
@@ -45,7 +47,7 @@ describe("server API test", () => {
         read: false,
       }).then(id => {
         superagent
-          .get(api + "/message/" + id.insertedId.toString())
+          .get(api + "/messages/" + id.insertedId.toString())
           .end((err, res) => {
             assert.equal(res.status, 200);
             assert.equal(typeof res.body.data, "object");
@@ -60,7 +62,7 @@ describe("server API test", () => {
 
     it("/GET. Try getting tweet that does not exits", done => {
       superagent
-        .get(api + "/message/" + "5f9b3b3b3b3b3b3b3b3b3b3b")
+        .get(api + "/messages/" + "5f9b3b3b3b3b3b3b3b3b3b3b")
         .end((err, res) => {
           assert.equal(res.status, 404);
           done();
@@ -76,19 +78,17 @@ describe("server API test", () => {
           message: "Hello World",
           author: "Test",
           read: false,
-          timestamp: new Date(),
         })
         .end((err, res) => {
           assert.equal(res.status, 201);
           assert.equal(typeof res.body.data, "object");
           const id = res.body.data.id;
 
-          superagent.get(api + "/message/" + id).end((err, res) => {
+          superagent.get(api + "/messages/" + id).end((err, res) => {
             assert.equal(res.status, 200);
             assert.equal(res.body.data.message, "Hello World");
             assert.equal(res.body.data.author, "Test");
             assert.equal(res.body.data.read, false);
-            assert.equal(typeof res.body.data.timestamp, "string");
             done();
           });
         });
@@ -100,7 +100,6 @@ describe("server API test", () => {
         .send({
           message: "Hello World",
           read: false,
-          timestamp: new Date(),
         })
         .end((err, res) => {
           assert.equal(res.status, 500);
@@ -114,7 +113,6 @@ describe("server API test", () => {
         .send({
           message: "Hello World",
           author: "Test",
-          timestamp: new Date(),
         })
         .end((err, res) => {
           assert.equal(res.status, 500);
@@ -128,21 +126,6 @@ describe("server API test", () => {
         .send({
           author: "Test",
           read: false,
-          timestamp: new Date(),
-        })
-        .end((err, res) => {
-          assert.equal(res.status, 500);
-          done();
-        });
-    });
-
-    it("/POST. Post a message with wrong input (no timestamp) should return 500", done => {
-      superagent
-        .post(api + "/messages")
-        .send({
-          message: "Hello World",
-          read: false,
-          author: "Test",
         })
         .end((err, res) => {
           assert.equal(res.status, 500);
@@ -157,7 +140,6 @@ describe("server API test", () => {
           message: "",
           read: false,
           author: "Test",
-          timestamp: new Date(),
         })
         .end((err, res) => {
           assert.equal(res.status, 500);
@@ -175,22 +157,6 @@ describe("server API test", () => {
             "It is very hard to think of good things to write.",
           read: false,
           author: "Test",
-          timestamp: new Date(),
-        })
-        .end((err, res) => {
-          assert.equal(res.status, 500);
-          done();
-        });
-    });
-
-    it("POST /messages. Post a message with incorrect timestamp (wrong format) should return 500", done => {
-      superagent
-        .post(api + "/messages")
-        .send({
-          message: "Hello World",
-          read: false,
-          author: "Test",
-          timestamp: "-abc",
         })
         .end((err, res) => {
           assert.equal(res.status, 500);
@@ -199,8 +165,7 @@ describe("server API test", () => {
     });
   });
 
-  describe("PATCH /message/:id", () => {
-    // TODO Test update tweet
+  describe("PATCH /messages/:id", () => {
     it("/PATCH. Update a tweet should return 200 and data of type object", done => {
       insertOne({
         message: "Hello World",
@@ -209,7 +174,7 @@ describe("server API test", () => {
         read: false,
       }).then(id => {
         superagent
-          .patch(api + "/message/" + id.insertedId.toString())
+          .patch(api + "/messages/" + id.insertedId.toString())
           .send({
             read: true,
           })
@@ -217,15 +182,31 @@ describe("server API test", () => {
             assert.equal(res.status, 200);
             const id = res.body.id;
 
-            superagent.get(api + "/message/" + id).end((err, res) => {
+            superagent.get(api + "/messages/" + id).end((err, res) => {
               assert.equal(res.status, 200);
               assert.equal(res.body.data.read, true);
               done();
             });
           });
+      });
+    });
 
-        // TODO Test patch with wrong input
-        // TODO Test patch with wrong id
+    it("/PATCH. Update a tweet with wrong input should return 500", done => {
+      insertOne({
+        message: "Hello World",
+        author: "Test",
+        timestamp: new Date(),
+        read: false,
+      }).then(id => {
+        superagent
+          .patch(api + "/messages/" + id.insertedId.toString())
+          .send({
+            read: "true",
+          })
+          .end((err, res) => {
+            assert.equal(res.status, 500);
+            done();
+          });
       });
     });
   });
@@ -243,6 +224,85 @@ describe("server API test", () => {
         assert.equal(res.status, 405);
         done();
       });
+    });
+  });
+
+  // Only for testing purposes
+  describe("Test purge database", () => {
+    it("/PURGE. Delete all messages should return 200", done => {
+      insertOne({
+        message: "Hello World",
+        author: "Test",
+        timestamp: new Date(),
+        read: false,
+      }).then(id => {
+        superagent.delete(api + "/purge").end((err, res) => {
+          assert.equal(res.status, 200);
+          done();
+        });
+      });
+    });
+
+    it("/PURGE. Purging empty database should return 200", done => {
+      superagent.delete(api + "/purge").end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.equal(res.body.message, "Database already empty");
+        done();
+      });
+    });
+  });
+
+  describe("Test mongo injection", () => {
+    it("/POST. Post a message with mongo injection should return 500", done => {
+      superagent
+        .post(api + "/messages")
+        .send({
+          message: "Hello World",
+          read: false,
+          $where: "function() {return (this.product == “Milk”)}",
+        })
+        .end((err, res) => {
+          assert.equal(res.status, 500);
+          done();
+        });
+    });
+
+    it("/PATCH. Update a tweet with mongo injection should return 500", done => {
+      superagent
+        .patch(api + "/messages/5f9b3b3b3b3b3b3b3b3b3b3b")
+        .send({
+          read: true,
+          $where: "function() {return (this.product == “Milk”)}",
+        })
+        .end((err, res) => {
+          assert.equal(res.status, 500);
+          done();
+        });
+    });
+  });
+
+  describe("Test HTML injections", () => {
+    it("/POST. Post a author with HTML injection should return 201 and author should be sanitized", done => {
+      superagent
+        .post(api + "/messages")
+        .send({
+          message: "Hello World",
+          author: "<script>alert('Hello World')</script>",
+          read: false,
+        })
+        .end((err, res) => {
+          assert.equal(res.status, 201);
+          assert.equal(typeof res.body.data, "object");
+          const id = res.body.data.id;
+
+          superagent.get(api + "/messages/" + id).end((err, res) => {
+            assert.equal(res.status, 200);
+            assert.equal(res.body.data.message, "Hello World");
+            assert.equal(res.body.data.author, "Test");
+            assert.equal(res.body.data.read, false);
+            done();
+          });
+        });
     });
   });
 });

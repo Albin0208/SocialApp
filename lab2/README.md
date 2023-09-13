@@ -1,6 +1,6 @@
 # Lab-2 Tweeeter API
 
-Simple API for Tweeeter application.
+Simple API for Tweeeter application. The API is built on Specification 1 on the course-site
 
 ## Prerequisites
 

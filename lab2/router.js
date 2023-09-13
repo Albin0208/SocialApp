@@ -1,4 +1,6 @@
 import express from "express";
+import mongoSanitize from "express-mongo-sanitize";
+import sanitizeHtml from "sanitize-html";
 import {
   getAll,
   getOne,
@@ -29,26 +31,25 @@ router
       });
   })
   .post((req, res) => {
+    if (mongoSanitize.has(req.body)) {
+      return res.status(500).json({ error: "Invalid input" });
+    }
     // Deconstruct the message object
-    const { message, author, read, timestamp } = req.body;
+    const { message, author, read } = req.body;
 
-    // Validate message, author, and timestamp
+    // Validate message, author
     if (!message || message.length > 140 || !author) {
-      return res
-        .status(500)
-        .json({ error: "Invalid message, author, or timestamp" });
+      return res.status(500).json({ error: "Invalid message, author" });
     }
 
-    if (new Date(timestamp).toString() === "Invalid Date") {
-      return res.status(500).json({ error: "Invalid timestamp" });
-    }
+    const timestamp = Date.now();
 
     // Validate read value
     if (typeof read !== "boolean") {
       return res.status(500).json({ error: "Invalid read value" });
     }
 
-    insertOne(req.body)
+    insertOne({ message: sanitizeHtml(message), author: sanitizeHtml(author), read, timestamp })
       .then(result => {
         if (result.acknowledged) {
           res.status(201).json({ data: { id: result.insertedId } });
@@ -58,17 +59,15 @@ router
       })
       .catch(error => {
         logError(error);
-        res
-          .status(500)
-          .json({
-            error: "Could not create new message",
-            message: error.message,
-          });
+        res.status(500).json({
+          error: "Could not create new message",
+          message: error.message,
+        });
       });
   });
 
 router
-  .route("/message/:id")
+  .route("/messages/:id")
   .get((req, res) => {
     getOne(req.params.id)
       .then(tweet => {
@@ -86,7 +85,11 @@ router
           .json({ error: "Failed to fetch message", message: error.message });
       });
   })
-  .patch(async (req, res) => {
+  .patch((req, res) => {
+    if (mongoSanitize.has(req.body)) {
+      return res.status(500).json({ error: "Invalid input" });
+    }
+
     if (typeof req.body.read !== "boolean") {
       return res.status(500).json({ error: "Invalid read value" });
     }
@@ -97,9 +100,10 @@ router
             .status(404)
             .json({ error: `Message id: ${req.params.id} not found` });
         }
-        res
-          .status(200)
-          .json({ message: `Message id: ${req.params.id} updated`, id: req.params.id });
+        res.status(200).json({
+          message: `Message id: ${req.params.id} updated`,
+          id: req.params.id,
+        });
       })
       .catch(error => {
         logError(error);
@@ -109,11 +113,12 @@ router
       });
   });
 
-router.route("/purge").delete(async (req, res) => {
+// Only for testing purposes
+router.route("/purge").delete((req, res) => {
   purgeDatabase()
     .then(result => {
       if (result.deletedCount === 0) {
-        return res.status(404).json({ error: "No messages found" });
+        return res.status(200).json({ message: "Database already empty" });
       }
       res.status(200).json({ message: "Database purged" });
     })
