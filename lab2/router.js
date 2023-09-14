@@ -1,6 +1,7 @@
 import express from "express";
 import mongoSanitize from "express-mongo-sanitize";
-import sanitizeHtml from "sanitize-html";
+import { escape } from "html-escaper";
+
 import {
   getAll,
   getOne,
@@ -42,14 +43,14 @@ router
       return res.status(500).json({ error: "Invalid message, author" });
     }
 
-    const timestamp = Date.now();
-
     // Validate read value
     if (typeof read !== "boolean") {
       return res.status(500).json({ error: "Invalid read value" });
     }
 
-    insertOne({ message: sanitizeHtml(message), author: sanitizeHtml(author), read, timestamp })
+    const timestamp = Date.now();
+
+    insertOne({ message: escape(message), author: escape(author), read, timestamp })
       .then(result => {
         if (result.acknowledged) {
           res.status(201).json({ data: { id: result.insertedId } });

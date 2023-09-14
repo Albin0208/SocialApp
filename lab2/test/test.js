@@ -287,7 +287,7 @@ describe("server API test", () => {
         .post(api + "/messages")
         .send({
           message: "Hello World",
-          author: "<script>alert('Hello World')</script>",
+          author: "<script>alert('hello world')</script>",
           read: false,
         })
         .end((err, res) => {
@@ -298,7 +298,7 @@ describe("server API test", () => {
           superagent.get(api + "/messages/" + id).end((err, res) => {
             assert.equal(res.status, 200);
             assert.equal(res.body.data.message, "Hello World");
-            assert.equal(res.body.data.author, "Test");
+            assert.equal(res.body.data.author, "&lt;script&gt;alert(&#39;hello world&#39;)&lt;/script&gt;");
             assert.equal(res.body.data.read, false);
             done();
           });
