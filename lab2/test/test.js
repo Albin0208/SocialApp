@@ -68,6 +68,16 @@ describe("server API test", () => {
           done();
         });
     });
+
+    it("/GET. Try getting tweet with invalid id", done => {
+      superagent
+        .get(api + "/messages/" + "123")
+        .end((err, res) => {
+          assert.equal(res.status, 500);
+          done();
+        });
+    });
+
   });
 
   describe("POST /messages", () => {
@@ -94,7 +104,7 @@ describe("server API test", () => {
         });
     });
 
-    it("/POST. Post a message with wrong input (no author) should return 500", done => {
+    it("/POST. Post a message with wrong input (no author) should return 400", done => {
       superagent
         .post(api + "/messages")
         .send({
@@ -102,12 +112,12 @@ describe("server API test", () => {
           read: false,
         })
         .end((err, res) => {
-          assert.equal(res.status, 500);
+          assert.equal(res.status, 400);
           done();
         });
     });
 
-    it("/POST. Post a message with wrong input (no read) should return 500", done => {
+    it("/POST. Post a message with wrong input (no read) should return 400", done => {
       superagent
         .post(api + "/messages")
         .send({
@@ -115,12 +125,12 @@ describe("server API test", () => {
           author: "Test",
         })
         .end((err, res) => {
-          assert.equal(res.status, 500);
+          assert.equal(res.status, 400);
           done();
         });
     });
 
-    it("/POST. Post a message with wrong input (no message) should return 500", done => {
+    it("/POST. Post a message with wrong input (no message) should return 400", done => {
       superagent
         .post(api + "/messages")
         .send({
@@ -128,12 +138,12 @@ describe("server API test", () => {
           read: false,
         })
         .end((err, res) => {
-          assert.equal(res.status, 500);
+          assert.equal(res.status, 400);
           done();
         });
     });
 
-    it("/POST. Post a message with incorrect message (empty message) should return 500", done => {
+    it("/POST. Post a message with incorrect message (empty message) should return 400", done => {
       superagent
         .post(api + "/messages")
         .send({
@@ -142,12 +152,12 @@ describe("server API test", () => {
           author: "Test",
         })
         .end((err, res) => {
-          assert.equal(res.status, 500);
+          assert.equal(res.status, 400);
           done();
         });
     });
 
-    it("/POST. Post a message with incorrect message (to long) should return 500", done => {
+    it("/POST. Post a message with incorrect message (to long) should return 400", done => {
       superagent
         .post(api + "/messages")
         .send({
@@ -159,7 +169,21 @@ describe("server API test", () => {
           author: "Test",
         })
         .end((err, res) => {
-          assert.equal(res.status, 500);
+          assert.equal(res.status, 400);
+          done();
+        });
+    });
+
+    it("/POST. Post a message with incorrect message (type not string) should return 400", done => {
+      superagent
+        .post(api + "/messages")
+        .send({
+          message: true,
+          read: false,
+          author: "Test",
+        })
+        .end((err, res) => {
+          assert.equal(res.status, 400);
           done();
         });
     });
@@ -209,6 +233,42 @@ describe("server API test", () => {
           });
       });
     });
+
+    it("/PATCH. Update a tweet with wrong id should return ", done => {
+      insertOne({
+        message: "Hello World",
+        author: "Test",
+        read: false,
+      }).then(id => {
+        superagent
+          .patch(api + "/messages/6502cd0877958a5e7aa9c461")
+          .send({
+            read: true,
+          })
+          .end((err, res) => {
+            assert.equal(res.status, 404);
+            done();
+          });
+      });
+    });
+
+    it("/PATCH. Update a tweet with invalid id should return ", done => {
+      insertOne({
+        message: "Hello World",
+        author: "Test",
+        read: false,
+      }).then(id => {
+        superagent
+          .patch(api + "/messages/123")
+          .send({
+            read: true,
+          })
+          .end((err, res) => {
+            assert.equal(res.status, 500);
+            done();
+          });
+      });
+    });
   });
 
   describe("Test invalid routes and params", () => {
@@ -222,31 +282,6 @@ describe("server API test", () => {
     it("All other methods on / should return 405", done => {
       superagent.post(api + "/").end((err, res) => {
         assert.equal(res.status, 405);
-        done();
-      });
-    });
-  });
-
-  // Only for testing purposes
-  describe("Test purge database", () => {
-    it("/PURGE. Delete all messages should return 200", done => {
-      insertOne({
-        message: "Hello World",
-        author: "Test",
-        timestamp: new Date(),
-        read: false,
-      }).then(id => {
-        superagent.delete(api + "/purge").end((err, res) => {
-          assert.equal(res.status, 200);
-          done();
-        });
-      });
-    });
-
-    it("/PURGE. Purging empty database should return 200", done => {
-      superagent.delete(api + "/purge").end((err, res) => {
-        assert.equal(res.status, 200);
-        assert.equal(res.body.message, "Database already empty");
         done();
       });
     });
@@ -298,7 +333,10 @@ describe("server API test", () => {
           superagent.get(api + "/messages/" + id).end((err, res) => {
             assert.equal(res.status, 200);
             assert.equal(res.body.data.message, "Hello World");
-            assert.equal(res.body.data.author, "&lt;script&gt;alert(&#39;hello world&#39;)&lt;/script&gt;");
+            assert.equal(
+              res.body.data.author,
+              "&lt;script&gt;alert(&#39;hello world&#39;)&lt;/script&gt;"
+            );
             assert.equal(res.body.data.read, false);
             done();
           });

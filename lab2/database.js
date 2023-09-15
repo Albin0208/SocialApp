@@ -32,7 +32,7 @@ async function getAll() {
 
 async function getOne(id) {
   try {
-    if (!ObjectId.isValid(id)) return null;
+    if (!ObjectId.isValid(id)) throw new Error("Invalid ID");
     await connect();
     return await db.collection("tweets").findOne({ _id: new ObjectId(id) });
   } catch (error) {
@@ -53,7 +53,7 @@ async function insertOne(tweet) {
 
 async function update(tweet) {
   try {
-    if (!ObjectId.isValid(tweet._id)) return null;
+    if (!ObjectId.isValid(tweet._id)) throw new Error("Invalid ID");
     await connect();
     return await db
       .collection("tweets")

@@ -40,17 +40,30 @@ router
 
     // Validate message, author
     if (!message || message.length > 140 || !author) {
-      return res.status(500).json({ error: "Invalid message, author" });
+      return res.status(400).json({ error: "Invalid message or author" });
+    }
+
+    if (typeof message !== "string" || typeof author !== "string") {
+      return res
+        .status(400)
+        .json({ error: "Invalid message or author type, expected a string" });
     }
 
     // Validate read value
     if (typeof read !== "boolean") {
-      return res.status(500).json({ error: "Invalid read value" });
+      return res
+        .status(400)
+        .json({ error: "Invalid read value, expected value of type bool" });
     }
 
     const timestamp = Date.now();
 
-    insertOne({ message: escape(message), author: escape(author), read, timestamp })
+    insertOne({
+      message: escape(message),
+      author: escape(author),
+      read,
+      timestamp,
+    })
       .then(result => {
         if (result.acknowledged) {
           res.status(201).json({ data: { id: result.insertedId } });
@@ -92,7 +105,9 @@ router
     }
 
     if (typeof req.body.read !== "boolean") {
-      return res.status(500).json({ error: "Invalid read value" });
+      return res
+        .status(500)
+        .json({ error: "Invalid read value, expected value of type bool" });
     }
     update({ _id: req.params.id, read: req.body.read })
       .then(result => {
@@ -113,23 +128,6 @@ router
           .json({ error: "Could not update message", message: error.message });
       });
   });
-
-// Only for testing purposes
-router.route("/purge").delete((req, res) => {
-  purgeDatabase()
-    .then(result => {
-      if (result.deletedCount === 0) {
-        return res.status(200).json({ message: "Database already empty" });
-      }
-      res.status(200).json({ message: "Database purged" });
-    })
-    .catch(error => {
-      logError(error);
-      res
-        .status(500)
-        .json({ error: "Failed to purge database", message: error.message });
-    });
-});
 
 // Catch-all route for invalid routes and methods
 router
