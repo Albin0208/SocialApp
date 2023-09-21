@@ -1,3 +1,5 @@
+const API_URL = "http://localhost:5000/messages";
+
 /**
  * Initializes the app by fetching the tweets from the server and rendering them in the UI.
  * @returns {void}
@@ -27,18 +29,32 @@ function renderTweets(tweets) {
 }
 
 /**
-  * Unescapes HTML characters in a string.
-  * @param {string} html - The string to unescape.
-  * @returns {string} The escaped string.
-  * 
-  * @example
-  * unescapeHTML("&lt;script&gt;alert(&#39;hello world&#39;)&lt;/script&gt;");
-  *  => "<script>alert('hello world')</script>"
-*/
+ * Unescapes HTML characters in a string.
+ * @param {string} html - The string to unescape.
+ * @returns {string} The escaped string.
+ *
+ * @example
+ * unescapeHTML("&lt;script&gt;alert(&#39;hello world&#39;)&lt;/script&gt;");
+ *  => "<script>alert('hello world')</script>"
+ */
 function unescapeHTML(html) {
   var unescapeEl = document.createElement("textarea");
   unescapeEl.innerHTML = html;
   return unescapeEl.textContent;
+}
+
+/**
+ * Escapes HTML characters in a string to prevent script injection.
+ * @param {string} html - The string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeHTML(html) {
+  return html
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /**
@@ -50,22 +66,21 @@ function unescapeHTML(html) {
  */
 function initializeTweetForm() {
   const form = document.getElementById("tweet_form");
-  form.addEventListener("submit", async event => {
+  form.addEventListener("submit", event => {
     event.preventDefault();
-    const tweet = document.getElementById("tweet");
-    if (!tweet.value || tweet.value.length > 140) {
+    const message = document.getElementById("tweet").value.trim();
+    let author = document.getElementById("author").value.trim();
+    if (!message || message.length > 140) {
       displayError(
         "Tweet is too long or too short! Maximum 140 characters, minimum 1 character."
       );
       return;
     }
-
-    try {
-      await postTweet(tweet.value);
-      //location.reload();
-    } catch (error) {
-      displayError("Error posting tweet:", error);
+    if (!author) {
+      author = "Anonymous";
     }
+
+    postTweet({ message: escapeHTML(message), author: escapeHTML(author) });
   });
 }
 
@@ -88,15 +103,22 @@ function displayError(message, error) {
  */
 async function getTweets() {
   try {
-    const response = await fetch("http://localhost:5000/messages");
+    const response = await fetch(API_URL);
     const data = await response.json();
     return data.data.sort((a, b) => b.timestamp - a.timestamp);
   } catch (error) {
-    console.error("Error fetching tweets:", error);
+    displayError("Error fetching tweets:", error);
     return [];
   }
 }
 
+/**
+  * Formats a timestamp to a string.
+  * @param {number} timestamp - A timestamp.
+  * @returns {string} A formatted string.
+  * @example
+  * formatDate(1609459200000) => "2021-01-01 00:00"
+*/
 function formatDate(timestamp) {
   const date = new Date(timestamp);
 
@@ -124,6 +146,7 @@ function createTweetCard(tweet) {
     cardDiv.classList.add("read");
   }
 
+  // Creates the header with the author
   const headerDiv = document.createElement("header");
   const headerParagraph = document.createElement("p");
   headerParagraph.textContent = unescapeHTML(tweet.author);
@@ -137,7 +160,7 @@ function createTweetCard(tweet) {
 
   const checkboxInput = document.createElement("input");
   checkboxInput.type = "checkbox";
-  checkboxInput.addEventListener("change", readTweet, tweet._id);
+  checkboxInput.addEventListener("change", markTweetAsRead, tweet._id);
   checkboxInput.id = tweet._id + "checkbox";
   checkboxInput.checked = tweet.read;
 
@@ -154,55 +177,62 @@ function createTweetCard(tweet) {
   return cardDiv;
 }
 
-function readTweet(event) {
+/**
+  * Marks a tweet as read or unread.
+  * @param {Event} event - The event object.
+  * @returns {void}
+*/
+function markTweetAsRead(event) {
   const id = event.target.id.replace("checkbox", "");
 
-  fetch(`http://localhost:5000/messages/${id}`, {
-    method: 'PATCH',
+  fetch(`${API_URL}/${id}`, {
+    method: "PATCH",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ read: event.target.checked }),
   })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Success:', data);
-    if (event.target.checked) {
-      document.getElementById(id).classList.add("read");
-    } else document.getElementById(id).classList.remove("read");
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-    displayError("Failed to update tweet");
-  });
+    .then(response => response.json())
+    .then(data => {
+      console.log("Success:", data);
+      if (event.target.checked) {
+        document.getElementById(id).classList.add("read");
+      } else document.getElementById(id).classList.remove("read");
+    })
+    .catch(error => {
+      displayError("Failed to update tweet", error);
+    });
 }
 
-function postTweet(message) {
+/**
+  * Posts a tweet to the server.
+  * @param {Object} input_tweet - A tweet object.
+  * @returns {void}
+*/
+function postTweet(input_tweet) {
   const tweet = {
-    message: message,
-    author: "Anonymous",
+    ...input_tweet,
     timestamp: Date.now(),
     read: false,
-  }
+  };
 
-  fetch('http://localhost:5000/messages', {
-    method: 'POST',
+  fetch(API_URL, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(tweet),
   })
     .then(response => response.json())
     .then(data => {
-      console.log('Success:', data);
+      console.log("Success:", data);
       const tweetFeed = document.getElementById("tweet_feed");
       document.getElementById("tweet_form").reset(); // Clear the form
-      const card = createTweetCard({ id: data.data.id, ...tweet});
+      const card = createTweetCard({ _id: data.data.id, ...tweet });
       tweetFeed.prepend(card);
     })
-    .catch((error) => {
-      console.error('Error:', error);
-      displayError("Failed to post tweet");
+    .catch(error => {
+      displayError("Failed to post tweet", error);
     });
 }
 
