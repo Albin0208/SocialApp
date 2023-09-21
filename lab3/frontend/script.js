@@ -119,77 +119,61 @@ function formatDate(timestamp) {
 function createTweetCard(tweet) {
   const cardDiv = document.createElement("div");
   cardDiv.id = tweet._id;
-  cardDiv.classList.add("card", "text-center", "mb-4");
+  cardDiv.classList.add("custom-card");
   if (tweet.read) {
-    cardDiv.classList.add("bg-info");
+    cardDiv.classList.add("read");
   }
 
-  const headerDiv = document.createElement("div");
-  headerDiv.classList.add("card-header");
-
-  const titleParagraph = document.createElement("p");
-  titleParagraph.classList.add("text-muted", "m-0");
-  titleParagraph.textContent = unescapeHTML(tweet.author); // Using textContent instead of innerHTML to prevent XSS
-
-  headerDiv.appendChild(titleParagraph);
-
-  const bodyDiv = document.createElement("div");
-  bodyDiv.classList.add("card-body", "row");
+  const headerDiv = document.createElement("header");
+  const headerParagraph = document.createElement("p");
+  headerParagraph.textContent = unescapeHTML(tweet.author);
+  headerDiv.appendChild(headerParagraph);
 
   const contentDiv = document.createElement("div");
-  contentDiv.classList.add("col-11");
+  contentDiv.classList.add("content");
 
   const contentParagraph = document.createElement("p");
-  contentParagraph.classList.add("card-text");
   contentParagraph.textContent = unescapeHTML(tweet.message);
 
-  contentDiv.appendChild(contentParagraph);
-
-  const checkboxDiv = document.createElement("div");
-  checkboxDiv.classList.add("col-1");
-
   const checkboxInput = document.createElement("input");
-  checkboxInput.classList.add("form-check-input");
   checkboxInput.type = "checkbox";
-  checkboxInput.value = "";
-  checkboxInput.addEventListener("change", readTweet, tweet.id);
+  checkboxInput.addEventListener("change", readTweet, tweet._id);
   checkboxInput.id = tweet._id + "checkbox";
   checkboxInput.checked = tweet.read;
 
-  checkboxDiv.appendChild(checkboxInput);
+  contentDiv.appendChild(contentParagraph);
+  contentDiv.appendChild(checkboxInput);
 
-  bodyDiv.appendChild(contentDiv);
-  bodyDiv.appendChild(checkboxDiv);
-
-  const footerDiv = document.createElement("div");
-  footerDiv.classList.add("card-footer", "text-muted");
-  footerDiv.textContent = `Posted at ${formatDate(tweet.timestamp)}`;
+  const footerDiv = document.createElement("footer");
+  footerDiv.textContent = `Posted at: ${formatDate(tweet.timestamp)}`;
 
   cardDiv.appendChild(headerDiv);
-  cardDiv.appendChild(bodyDiv);
+  cardDiv.appendChild(contentDiv);
   cardDiv.appendChild(footerDiv);
 
   return cardDiv;
 }
 
-function updateTweets(tweets) {
-  document.cookie = "tweets=" + JSON.stringify(tweets);
-}
-
 function readTweet(event) {
   const id = event.target.id.replace("checkbox", "");
 
-  if (!event.target.checked) {
-    document.getElementById(id).classList.remove("bg-info");
-  } else document.getElementById(id).classList.add("bg-info");
-
-  tweets = getTweets();
-  tweets.map(tweet => {
-    if (tweet.id == event.target.id.replace("checkbox", "")) {
-      tweet.read = !tweet.read;
-      updateTweets(tweets);
-      return;
-    }
+  fetch(`http://localhost:5000/messages/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ read: event.target.checked }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Success:', data);
+    if (event.target.checked) {
+      document.getElementById(id).classList.add("read");
+    } else document.getElementById(id).classList.remove("read");
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    displayError("Failed to update tweet");
   });
 }
 
@@ -212,11 +196,13 @@ function postTweet(message) {
     .then(data => {
       console.log('Success:', data);
       const tweetFeed = document.getElementById("tweet_feed");
+      document.getElementById("tweet_form").reset(); // Clear the form
       const card = createTweetCard({ id: data.data.id, ...tweet});
       tweetFeed.prepend(card);
     })
     .catch((error) => {
       console.error('Error:', error);
+      displayError("Failed to post tweet");
     });
 }
 

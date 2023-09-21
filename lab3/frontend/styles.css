@@ -1,0 +1,53 @@
+.read {
+  background-color: rgba(14, 78, 141, 0.5) !important;
+}
+
+.custom-card {
+  text-align: center;
+  background-color: white;
+  border: 1px solid rgba(73, 80, 87, 0.5);
+  border-radius: 10px;
+  width: 100%;
+  margin: 1em 0;
+  padding: 0;
+}
+.custom-card > header,
+.custom-card > footer {
+  background-color:whitesmoke;
+  opacity: 70%;
+  padding: 0.5em;
+  margin: 0;
+}
+
+.custom-card > header {
+  border-radius: 10px 10px 0 0;
+}
+
+.custom-card > footer {
+  border-radius: 0 0 10px 10px;
+}
+
+.custom-card p {
+  margin: 0;
+}
+
+.custom-card > div {
+  border-top: 1px solid rgba(73, 80, 87, 0.5);
+  border-bottom: 1px solid rgba(73, 80, 87, 0.5);
+  padding: 1em;
+}
+
+.content {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+}
+
+.content > p {
+  margin-left: auto;
+}
+
+input[type='checkbox'] {
+  margin-left: auto;
+}

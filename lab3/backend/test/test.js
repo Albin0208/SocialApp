@@ -1,9 +1,13 @@
 import superagent from "superagent";
 import assert from "assert";
 import { startServer } from "../server.js";
-import { setDbForTesting, purgeDatabase, insertOne } from "../database.js";
+import {
+  setDbForTesting,
+  purgeDatabase,
+  insertOne,
+  closeDB,
+} from "../database.js";
 import { describe } from "mocha";
-import { escape } from "querystring";
 
 let server;
 let api = "http://localhost:5000";
@@ -26,6 +30,7 @@ describe("server API test", () => {
 
   after(done => {
     // CLose the server when done
+    closeDB();
     server.close(() => done());
   });
 
@@ -70,14 +75,11 @@ describe("server API test", () => {
     });
 
     it("/GET. Try getting tweet with invalid id", done => {
-      superagent
-        .get(api + "/messages/" + "123")
-        .end((err, res) => {
-          assert.equal(res.status, 500);
-          done();
-        });
+      superagent.get(api + "/messages/" + "123").end((err, res) => {
+        assert.equal(res.status, 500);
+        done();
+      });
     });
-
   });
 
   describe("POST /messages", () => {
@@ -341,6 +343,19 @@ describe("server API test", () => {
             done();
           });
         });
+    });
+  });
+
+  describe("Test cors", () => {
+    it("check cors headers", done => {
+      superagent.get("http://localhost:5000/messages").end((err, res) => {
+        if (err) done(err);
+        assert.equal(
+          "http://127.0.0.1:5500", // access control is restricted on a browser level
+          res.headers["access-control-allow-origin"]
+        );
+        done();
+      });
     });
   });
 });

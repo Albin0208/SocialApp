@@ -7,7 +7,6 @@ import {
   getOne,
   insertOne,
   update,
-  purgeDatabase,
 } from "./database.js";
 
 const router = express.Router();

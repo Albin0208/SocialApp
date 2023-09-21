@@ -1,12 +1,12 @@
 import express from "express";
 import router from "./router.js";
-import { closeDB } from "./database.js";
 import cors from "cors";
 
 const app = express();
 
 app.use(cors({
   origin: "http://127.0.0.1:5500",
+  methods: "GET,POST,PATCH",
 }));
 
 app.use(express.json());
@@ -29,8 +29,5 @@ function startServer(config, callback) {
     callback && callback();
   });
 }
-
-// Close the database connection after 2 seconds.
-// setTimeout(closeDB, 2000); // This causes error when running in production, but is needed for testing.
 
 export { startServer };
