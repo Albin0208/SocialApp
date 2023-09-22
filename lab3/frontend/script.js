@@ -44,20 +44,6 @@ function unescapeHTML(html) {
 }
 
 /**
- * Escapes HTML characters in a string to prevent script injection.
- * @param {string} html - The string to escape.
- * @returns {string} The escaped string.
- */
-function escapeHTML(html) {
-  return html
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-/**
  * Initializes the tweet form and adds a submit event listener.
  * When the form is submitted, the tweet is posted to the server.
  * If the tweet is successfully posted, the page is reloaded.
@@ -80,7 +66,7 @@ function initializeTweetForm() {
       author = "Anonymous";
     }
 
-    postTweet({ message: escapeHTML(message), author: escapeHTML(author) });
+    postTweet({ message: message, author: author });
   });
 }
 
@@ -107,7 +93,7 @@ async function getTweets() {
     const data = await response.json();
     return data.data.sort((a, b) => b.timestamp - a.timestamp);
   } catch (error) {
-    displayError("Error fetching tweets:", error);
+    displayError("Error fetching tweets", error);
     return [];
   }
 }
@@ -226,14 +212,24 @@ function postTweet(input_tweet) {
     .then(response => response.json())
     .then(data => {
       console.log("Success:", data);
+
+      resetForm();
       const tweetFeed = document.getElementById("tweet_feed");
-      document.getElementById("tweet_form").reset(); // Clear the form
       const card = createTweetCard({ _id: data.data.id, ...tweet });
       tweetFeed.prepend(card);
     })
     .catch(error => {
       displayError("Failed to post tweet", error);
     });
+}
+
+/**
+ * Resets the tweet form.
+ * @returns {void}
+ */
+function resetForm() {
+  document.getElementById("tweet_form").reset(); // Clear the form
+  document.getElementById("tweet_error").textContent = "";
 }
 
 window.onload = initializeApp;

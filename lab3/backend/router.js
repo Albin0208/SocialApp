@@ -34,6 +34,7 @@ router
     if (mongoSanitize.has(req.body)) {
       return res.status(500).json({ error: "Invalid input" });
     }
+
     // Deconstruct the message object
     const { message, author, read } = req.body;
 
