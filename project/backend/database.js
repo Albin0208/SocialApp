@@ -1,21 +1,41 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = "mongodb://127.0.0.1:27017/tdp013";
+const MONGODB_URI = "mongodb://127.0.0.1:27017/";
+let dbName = "tdp013";
 
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const connect = async () => {
+  try {
+    // Connect to the MongoDB database
+    await mongoose.connect(MONGODB_URI + dbName, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("Connected to the database");
+  } catch (error) {
+    console.error("Database connection error:", error);
+    throw error; // Rethrow the error to handle it elsewhere if needed
+  }
+};
 
-const db = mongoose.connection;
+const closeDb = async () => {
+  await mongoose.connection.close();
+  console.log("Closed database connection");
+};
 
-db.on("error", (error) => {
-  console.error("Database connection error:", error);
-  process.exit(1); // Exit the application on database connection error
-});
+const setDb = name => {
+  dbName = name;
+};
 
-db.once("open", () => {
-  console.log("Connected to the database");
-});
+const purgeDatabase = async () => {
+  // Get a list of all collection names in the database
+  const collections = await mongoose.connection.db.collections();
 
-export default db;
+  // Loop through the collections and drop each one
+  for (const collection of collections) {
+    await collection.drop();
+  }
+
+  console.log(`All collections in ${dbName} database have been purged.`);
+};
+
+export { connect, closeDb, setDb, purgeDatabase };

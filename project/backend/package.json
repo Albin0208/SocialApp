@@ -2,7 +2,7 @@
   "name": "lab2",
   "version": "1.0.0",
   "description": "There should be a `README.md` with instructions for running and configuring each of the labs and the project.",
-  "main": "server.js",
+  "main": "app.js",
   "type": "module",
   "scripts": {
     "test": "mocha",

@@ -10,6 +10,10 @@ import { comparePasswords, hashPassword } from "../utils/helpers.js";
  */
 export const registerUser = async (req, res) => {
   const { username } = req.body;
+
+  if (!req.body.password)
+    return res.status(400).json({ error: 'Password is required.' });
+
   try {
     const password = hashPassword(req.body.password);
 
@@ -21,14 +25,11 @@ export const registerUser = async (req, res) => {
     if (error.code === 11000) {
       // MongoDB duplicate key error (unique constraint violation)
       res.status(400).json({ error: "Username already exists." });
-    } else if (error.name === "ValidationError") {
-      // Mongoose validation error
-      res.status(400).json({ error: error.message });
     } else {
       // Other errors (database errors, unexpected errors)
       res
         .status(500)
-        .json({ error: "Registration failed. Please try again later." });
+        .json({ error: "Registration failed. Please try again later.", message: error.message });
     }
   }
 };
