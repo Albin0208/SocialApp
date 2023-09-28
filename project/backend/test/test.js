@@ -50,23 +50,6 @@ describe("User routes", () => {
       });
   });
 
-  // it("/User/login should return 200 and a token when valid credentials are provided", done => {
-  //   // First, register a user
-  //   superagent
-  //     .post(API_URL + "/user/register")
-  //     .send({ username: "testuser", password: "testpassword" })
-  //     .end((err, res) => {
-  //       superagent
-  //         .post(API_URL + "/user/login")
-  //         .send({ username: "testuser", password: "testpassword" })
-  //         .end((err, res) => {
-  //           assert.equal(res.status, 200);
-  //           assert.ok(res.body.token);
-  //           done();
-  //         });
-  //     });
-  // });
-
   it("/User/login should return 401 when invalid credentials are provided", done => {
     superagent
       .post(API_URL + "/user/login")
