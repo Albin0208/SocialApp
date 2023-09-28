@@ -18,15 +18,15 @@ app.use(express.json());
 // Mount API routes
 app.use("/user", userRoutes);
 
-// Connect to the database and start the server
+/**
+ * Starts the server by connecting to the database and listening on the specified port.
+ * @returns {Promise<import('http').Server>} The HTTP server instance.
+ */
 async function startServer() {
   await connect(); // Connect to the database
   return app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 }
-
-// Start the server
-// startServer();
 
 export { startServer };
