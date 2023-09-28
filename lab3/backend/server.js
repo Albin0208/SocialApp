@@ -11,8 +11,8 @@ app.use(cors({
 
 app.use(express.json());
 
-app.use(router);
 // Use the router middleware
+app.use(router);
 
 /**
  * Returns a server and executes the callback when the server is running.
