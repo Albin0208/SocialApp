@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import { comparePasswords, hashPassword } from "../utils/helpers.js";
-import jwt from "jsonwebtoken"
-import 'dotenv/config'
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 /**
  * Registers a new user.
@@ -14,7 +14,7 @@ export const registerUser = async (req, res) => {
   const { username } = req.body;
 
   if (!req.body.password)
-    return res.status(400).json({ error: 'Password is required.' });
+    return res.status(400).json({ error: "Password is required." });
 
   try {
     const password = hashPassword(req.body.password);
@@ -29,9 +29,10 @@ export const registerUser = async (req, res) => {
       res.status(400).json({ error: "Username already exists." });
     } else {
       // Other errors (database errors, unexpected errors)
-      res
-        .status(500)
-        .json({ error: "Registration failed. Please try again later.", message: error.message });
+      res.status(500).json({
+        error: "Registration failed. Please try again later.",
+        message: error.message,
+      });
     }
   }
 };
@@ -52,14 +53,28 @@ export const loginUser = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (comparePasswords(password, user.password) === false)
-      return res.status(401).json({ error: "Incorrect password" });
+      return res
+        .status(401)
+        .json({ error: "Authentication failed: Incorrect password" });
 
     // Set up jwt
-    const token = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30d" });
+    const accessToken = jwt.sign(
+      { username: user.username },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "1h" }
+    );
+    const refreshToken = jwt.sign(
+      { username: user.username },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
 
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
 
-    // Passwords match, user is authenticated
-    res.status(200).json({ message: "Login successful", user, token });
+    res.status(200).json({ message: "Login successful", accessToken });
   } catch (error) {
     // Handle errors, such as database errors
     res.status(500).json({ error: error.message });
