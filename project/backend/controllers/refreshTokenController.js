@@ -15,12 +15,12 @@ export const handleRefreshToken = (req, res) => {
     
     // Verify that the user has a refresh token
     if (!cookie?.refreshToken)
-      return res.status(401).json({ error: "Authentication required." });
+      return res.sendStatus(401);
 
     const refreshToken = cookie.refreshToken;
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-      if (err) return res.status(403).json({ error: "Access Forbidden." });
+      if (err) return res.sendStatus(403);
       console.log(user);
       const accessToken = jwt.sign(
         { username: user.username },

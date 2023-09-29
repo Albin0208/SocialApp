@@ -95,12 +95,12 @@ export const logoutUser = (req, res) => {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({ error: "Authentication required." });
+      return res.sendStatus(401);
     }
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return res.status(403).json({ error: "Access Forbidden." });
+        return res.sendStatus(403);
       }
 
       // Clear the refreshToken cookie
