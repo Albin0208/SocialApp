@@ -15,6 +15,7 @@ export const Login = () => {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include", // Send cookies along with the request
       body: JSON.stringify({
         username,
         password,
