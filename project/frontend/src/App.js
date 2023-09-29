@@ -3,32 +3,21 @@ import { Login } from "./pages/login.js"; // import the Login component
 import { Register } from "./pages/register.js"; // import the Register component
 import { Home } from "./pages/home.js"; // import the Home component
 import { MainLayout } from "./components/mainLayout.jsx";
+import { AuthLayout } from "./components/authLayout.jsx";
 
 const App = () => {
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <MainLayout>
-                <Home />
-              </MainLayout>
-            }
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="*"
-            element={
-              <MainLayout>
-                <h1>Not Found!</h1>
-              </MainLayout>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+        </Route>
+        <Route path="auth/" element={<AuthLayout />}>
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+        </Route>
+        <Route path="*" element={<h1>Not Found!</h1>} />
+      </Routes>
     </>
   );
 };

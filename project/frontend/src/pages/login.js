@@ -35,70 +35,61 @@ export const Login = () => {
   };
 
   return (
-    <Container className="mx-auto w-50 my-5">
-      <div className="p-5 rounded bg-light">
-        <h2 className="mb-4 text-center">Social App</h2>
+    <>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Form.Group controlId="username" className="mb-3">
+          <Form.Label>Username</Form.Label>
+          <Form.Control
+            type="text"
+            autoComplete="username"
+            placeholder="Username"
+            size="lg"
+            {...register("username", {
+              required: "Username is required",
+            })}
+            isInvalid={errors.username}
+          />
+          {errors.username && (
+            <Form.Text className="text-danger">
+              {errors.username.message}
+            </Form.Text>
+          )}
+        </Form.Group>
 
-        {error && <Alert variant="danger">{error}</Alert>}
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Form.Group controlId="username" className="mb-3">
-            <Form.Label>Username</Form.Label>
-            <Form.Control
-              type="text"
-              autoComplete="username"
-              placeholder="Username"
-              size="lg"
-              {...register("username", {
-                required: "Username is required",
-              })}
-              isInvalid={errors.username}
-            />
-            {errors.username && (
-              <Form.Text className="text-danger">
-                {errors.username.message}
-              </Form.Text>
-            )}
-          </Form.Group>
+        <Form.Group controlId="password" className="mb-4">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            autoComplete="current-password"
+            placeholder="Password"
+            size="lg"
+            {...register("password", {
+              required: "Password is required",
+            })}
+            isInvalid={errors.password}
+          />
+          {errors.password && (
+            <Form.Text className="text-danger">
+              {errors.password.message}
+            </Form.Text>
+          )}
+        </Form.Group>
 
-          <Form.Group controlId="password" className="mb-4">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              autoComplete="current-password"
-              placeholder="Password"
-              size="lg"
-              {...register("password", {
-                required: "Password is required",
-              })}
-              isInvalid={errors.password}
-            />
-            {errors.password && (
-              <Form.Text className="text-danger">
-                {errors.password.message}
-              </Form.Text>
-            )}
-          </Form.Group>
-
-          <div className="d-flex justify-content-center">
-            <Button
-              className="mx-auto"
-              variant="primary"
-              type="submit"
-              size="lg"
-            >
-              Log in
-            </Button>
-          </div>
-        </Form>
-        <hr />
-        <Row>
-          <Col>
-            <p className="text-center">
-              Don't have an account? <Link to="/register">Sign Up</Link>
-            </p>
-          </Col>
-        </Row>
-      </div>
-    </Container>
+        <div className="d-flex justify-content-center">
+          <Button className="mx-auto" variant="primary" type="submit" size="lg">
+            Log in
+          </Button>
+        </div>
+      </Form>
+      <hr />
+      <Row>
+        <Col>
+          <p className="text-center">
+            Don't have an account? <Link to="/auth/register">Sign Up</Link>
+          </p>
+        </Col>
+      </Row>
+    </>
   );
 };
