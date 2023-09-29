@@ -77,7 +77,7 @@ export const Home = () => {
         ) : (
           <Container className="w-100 p-0">
             {posts.map(post => (
-              <Card className="mb-3 w-100">
+              <Card className="mb-3 w-100" key={post._id}>
                 <Card.Body>
                   <Card.Title>Card Title</Card.Title>
                   <Card.Text>{post.content}</Card.Text>
