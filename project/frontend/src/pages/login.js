@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap"; // Import Alert component
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "../shared";
 import { useForm } from "react-hook-form";
 
@@ -12,6 +12,7 @@ export const Login = () => {
   } = useForm();
 
   const [error, setError] = useState(""); // State to hold the error message
+  const navigate = useNavigate();
 
   const onSubmit = async data => {
     const response = await fetch(baseUrl + "user/login", {
@@ -27,6 +28,7 @@ export const Login = () => {
 
     if (response.ok) {
       console.log("Login successful!", responseData);
+      return navigate("/");
     } else {
       setError(responseData.error); // Set the error message from the backend
     }

@@ -1,8 +1,8 @@
-import React from "react";
 import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap"; // Import Alert component
 import { Link } from "react-router-dom";
 import { baseUrl } from "../shared";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 
 export const Register = () => {
   const {
@@ -12,7 +12,7 @@ export const Register = () => {
     watch,
   } = useForm();
 
-  const [error, setError] = React.useState("");
+  const [error, setError] = useState("");
 
   const onSubmit = async data => {
     // Send the registration data to the server
