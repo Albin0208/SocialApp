@@ -11,12 +11,14 @@ import "dotenv/config";
  * @returns {Object} The newly created user object.
  */
 export const registerUser = async (req, res) => {
-  const { username } = req.body;
-
-  if (!req.body.password)
-    return res.status(400).json({ error: "Password is required." });
-
   try {
+    const { username } = req.body;
+
+    if (!username)
+      return res.status(400).json({ error: "Username is required." });
+
+    if (!req.body.password)
+      return res.status(400).json({ error: "Password is required." });
     const password = hashPassword(req.body.password);
 
     const user = await User.create({ username, password });
@@ -24,6 +26,7 @@ export const registerUser = async (req, res) => {
     // Respond with a success status code and the user data
     res.status(201).json(user);
   } catch (error) {
+    console.log(error.code);
     if (error.code === 11000) {
       // MongoDB duplicate key error (unique constraint violation)
       res.status(400).json({ error: "Username already exists." });
@@ -45,8 +48,8 @@ export const registerUser = async (req, res) => {
  * @returns {Object} The response object containing a message and the authenticated user object, or an error message.
  */
 export const loginUser = async (req, res) => {
-  const { username, password } = req.body;
   try {
+    const { username, password } = req.body;
     // Find the user by username and check if the password matches
     const user = await User.findOne({ username });
 
@@ -61,7 +64,7 @@ export const loginUser = async (req, res) => {
     const accessToken = jwt.sign(
       { username: user.username },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "15m" }
     );
     const refreshToken = jwt.sign(
       { username: user.username },
@@ -78,5 +81,36 @@ export const loginUser = async (req, res) => {
   } catch (error) {
     // Handle errors, such as database errors
     res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Logs out the user by clearing the refreshToken cookie.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} - The response object with a success status code or an error message.
+ */
+export const logoutUser = (req, res) => {
+  try {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+      if (err) {
+        return res.status(403).json({ error: "Access Forbidden." });
+      }
+
+      // Clear the refreshToken cookie
+      res.clearCookie("refreshToken", { httpOnly: true });
+
+      // Send a success response (user is effectively logged out)
+      return res.sendStatus(204);
+    });
+  } catch (error) {
+    console.error("Logout failed:", error);
+    return res.status(500).json({ error: "Logout failed" });
   }
 };
