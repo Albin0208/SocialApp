@@ -8,7 +8,7 @@ export const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     // Prepare the registration data
@@ -40,64 +40,71 @@ export const Register = () => {
   };
 
   return (
-    <Container className="d-flex justify-content-center align-items-center vh-100">
-      <div className="p-5 rounded bg-light">
-        <h2 className="mb-4 text-center">Social App</h2>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="username" className="mb-3">
-            <Form.Label>Username</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Username"
-              size="lg"
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-            />
-          </Form.Group>
+    <>
+      <Container className="d-flex justify-content-center align-items-center vh-100">
+        <div className="p-5 rounded bg-light">
+          <h2 className="mb-4 text-center">Social App</h2>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="username" className="mb-3">
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Username"
+                size="lg"
+                value={username}
+                onChange={e => {
+                  setUsername(e.target.value);
+                }}
+              />
+            </Form.Group>
 
-          <Form.Group controlId="password" className="mb-4">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Password"
-              size="lg"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-            />
-          </Form.Group>
+            <Form.Group controlId="password" className="mb-4">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Password"
+                size="lg"
+                value={password}
+                onChange={e => {
+                  setPassword(e.target.value);
+                }}
+              />
+            </Form.Group>
 
-          <Form.Group controlId="confirmPassword" className="mb-4">
-            <Form.Label>Confirm Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Confirm Password"
-              size="lg"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-              }}
-            />
-          </Form.Group>
+            <Form.Group controlId="confirmPassword" className="mb-4">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Confirm Password"
+                size="lg"
+                value={confirmPassword}
+                onChange={e => {
+                  setConfirmPassword(e.target.value);
+                }}
+              />
+            </Form.Group>
 
-          <div className="d-flex justify-content-center">
-            <Button className="mx-auto" variant="primary" type="submit" size="lg">
-              Register
-            </Button>
-          </div>
-        </Form>
-        <hr />
-        <Row>
-          <Col>
-            <p>
-              Already have an account? <Link to="/login">Sign In</Link>
-            </p>
-          </Col>
-        </Row>
-      </div>
-    </Container>
+            <div className="d-flex justify-content-center">
+              <Button
+                className="mx-auto"
+                variant="primary"
+                type="submit"
+                size="lg"
+              >
+                Register
+              </Button>
+            </div>
+          </Form>
+          <hr />
+          <Row>
+            <Col>
+              <p>
+                Already have an account? <Link to="/login">Sign In</Link>
+              </p>
+            </Col>
+          </Row>
+        </div>
+      </Container>
+    </>
   );
 };

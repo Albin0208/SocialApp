@@ -1,5 +1,7 @@
 import User from "../models/userModel.js";
 import { comparePasswords, hashPassword } from "../utils/helpers.js";
+import jwt from "jsonwebtoken"
+import 'dotenv/config'
 
 /**
  * Registers a new user.
@@ -52,8 +54,12 @@ export const loginUser = async (req, res) => {
     if (comparePasswords(password, user.password) === false)
       return res.status(401).json({ error: "Incorrect password" });
 
+    // Set up jwt
+    const token = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30d" });
+
+
     // Passwords match, user is authenticated
-    res.status(200).json({ message: "Login successful", user });
+    res.status(200).json({ message: "Login successful", user, token });
   } catch (error) {
     // Handle errors, such as database errors
     res.status(500).json({ error: error.message });
