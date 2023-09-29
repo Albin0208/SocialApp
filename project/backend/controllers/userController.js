@@ -26,7 +26,6 @@ export const registerUser = async (req, res) => {
     // Respond with a success status code and the user data
     res.status(201).json(user);
   } catch (error) {
-    console.log(error.code);
     if (error.code === 11000) {
       // MongoDB duplicate key error (unique constraint violation)
       res.status(400).json({ error: "Username already exists." });
@@ -45,7 +44,7 @@ export const registerUser = async (req, res) => {
  *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
- * @returns {Object} The response object containing a message and the authenticated user object, or an error message.
+ * @returns {Object} The response object containing a message and the accesstoken or an error message.
  */
 export const loginUser = async (req, res) => {
   try {

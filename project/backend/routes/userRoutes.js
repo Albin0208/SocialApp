@@ -15,4 +15,6 @@ router.get('/logout', logoutUser)
 router.use(verifyJWT);
 
 
+
+
 export default router;

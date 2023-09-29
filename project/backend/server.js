@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 import { connect } from "./database.js"; // Connect to the database
 import cookieParser from "cookie-parser";
+import { verifyJWT } from "./middleware/verifyJWT.js";
 
 const app = express();
 const port = 5000;
@@ -21,6 +23,9 @@ app.use(cookieParser())
 
 // Mount API routes
 app.use("/user", userRoutes);
+app.use("/posts", postRoutes);
+app.use(verifyJWT); // Protect all routes below this line
+
 
 /**
  * Starts the server by connecting to the database and listening on the specified port.
