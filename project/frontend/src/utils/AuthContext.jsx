@@ -5,8 +5,9 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
-  // const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
   const [token, setToken] = useState(null);
+  const [successFulRegistration, setSuccessFulRegistration] = useState(false);
 
   useEffect(() => {
     checkUserStatus();
@@ -28,20 +29,59 @@ export const AuthProvider = ({ children }) => {
         // Handle successful login
         const responseData = await response.json();
         setToken(responseData.accessToken);
+        setError(null);
       } else {
         // Handle login failure
+        const responseData = await response.json();
+        setError(responseData.error);
+
         console.error("Login failed");
       }
     } catch (error) {}
     setLoading(false);
   };
 
-  const logoutUser = () => {
-    // TODO Add logout logic
+  const logoutUser = async () => {
+    try {
+      const response = await fetch(baseUrl + "user/logout", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (response.ok) {
+        setToken(null);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setLoading(false);
   };
 
-  const registerUser = userInfo => {
-    // TODO Add register logic
+  const registerUser = async userInfo => {
+    // Send the registration data to the server
+    try {
+      const response = await fetch(baseUrl + "user/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userInfo),
+      });
+
+      if (response.ok) {
+        // Registration successful, you can handle the response here
+        console.log("Registration successful!");
+        setSuccessFulRegistration(true);
+        // TODO redirect to login page or login automatically
+      } else {
+        // Registration failed, handle error or show a message
+        const errorData = await response.json();
+        setError(errorData.error); // Set the error message from the backend
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+    setLoading(false);
   };
 
   const checkUserStatus = async () => {
@@ -61,8 +101,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const contextData = {
-    // user,
     token,
+    error,
+    successFulRegistration,
     setToken,
     loading,
     registerUser,

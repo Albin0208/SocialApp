@@ -1,8 +1,8 @@
 import { Form, Button, Row, Col, Alert } from "react-bootstrap"; // Import Alert component
-import { Link } from "react-router-dom";
-import { baseUrl } from "../shared";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useAuth } from "../utils/AuthContext";
 
 export const Register = () => {
   const {
@@ -12,28 +12,19 @@ export const Register = () => {
     watch,
   } = useForm();
 
-  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const { token, registerUser, error, successFulRegistration } = useAuth();
+
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [navigate, token]);
 
   const onSubmit = async data => {
-    // Send the registration data to the server
     try {
-      const response = await fetch(baseUrl + "user/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        // Registration successful, you can handle the response here
-        console.log("Registration successful!");
-        // TODO redirect to login page or login automatically
-      } else {
-        // Registration failed, handle error or show a message
-        const errorData = await response.json();
-        setError(errorData.error); // Set the error message from the backend
-      }
+      await registerUser(data); // Use the registerUser function from AuthContext
     } catch (error) {
       console.error("An error occurred:", error);
     }
@@ -42,6 +33,9 @@ export const Register = () => {
   return (
     <>
       {error && <Alert variant="danger">{error}</Alert>}
+      {successFulRegistration && (
+        <Alert variant="success">You have successfully registered</Alert>
+      )}
 
       <Form onSubmit={handleSubmit(onSubmit)}>
         <Form.Group controlId="username" className="mb-3">

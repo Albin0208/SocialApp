@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Form, Button,  Row, Col, Alert } from "react-bootstrap"; // Import Alert component
+import { Form, Button, Row, Col, Alert } from "react-bootstrap"; // Import Alert component
 import { Link, useNavigate } from "react-router-dom";
-import { baseUrl } from "../shared";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../utils/AuthContext";
 
@@ -12,11 +11,9 @@ export const Login = () => {
     formState: { errors },
   } = useForm();
 
-  const [error, setError] = useState(""); // State to hold the error message
   const navigate = useNavigate();
 
-  const { token, loginUser } = useAuth();
-
+  const { token, loginUser, error } = useAuth();
 
   useEffect(() => {
     if (token) {
@@ -24,32 +21,19 @@ export const Login = () => {
     }
   }, [navigate, token]);
 
-  // const onSubmit = async data => {
-  //   loginUser(data);
-
-  //   // const response = await fetch(baseUrl + "user/login", {
-  //   //   method: "POST",
-  //   //   headers: {
-  //   //     "Content-Type": "application/json",
-  //   //   },
-  //   //   credentials: "include",
-  //   //   body: JSON.stringify(data),
-  //   // });
-
-  //   // const responseData = await response.json();
-
-  //   // if (response.ok) {
-  //   //   console.log("Login successful!", responseData);
-  //   //   return navigate("/");
-  //   // } else {
-  //   //   setError(responseData.error); // Set the error message from the backend
-  //   // }
-  // };
+  const onSubmit = async data => {
+    try {
+      await loginUser(data); // Use the loginUser function from AuthContext
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
 
   return (
     <>
       {error && <Alert variant="danger">{error}</Alert>}
-      <Form onSubmit={handleSubmit(loginUser)}>
+
+      <Form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Form.Group controlId="username" className="mb-3">
           <Form.Label>Username</Form.Label>
           <Form.Control
