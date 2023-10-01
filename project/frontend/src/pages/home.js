@@ -1,7 +1,7 @@
 import { Card, Container } from "react-bootstrap";
 import { baseUrl } from "../shared";
 import { useEffect, useState } from "react";
-import { CreatePost } from "../components/createPost.jsx";
+import { CreatePost } from "../components/CreatePost.jsx";
 
 export const Home = () => {
   const [posts, setPosts] = useState([]);
