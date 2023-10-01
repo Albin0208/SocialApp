@@ -114,7 +114,7 @@ export const Register = () => {
       <Row>
         <Col>
           <p className="text-center">
-            Already have an account? <Link to="/auth/login">Sign In</Link>
+            Already have an account? <Link to="/login">Sign In</Link>
           </p>
         </Col>
       </Row>

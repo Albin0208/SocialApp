@@ -5,21 +5,24 @@ import { Home } from "./pages/Home.js"; // import the Home component
 import { MainLayout } from "./components/MainLayout.jsx";
 import { AuthLayout } from "./components/AuthLayout.jsx";
 import { ProtectedRoutes } from "./utils/ProtectedRoutes.jsx";
+import { AuthProvider } from "./utils/AuthContext";
 
 const App = () => {
   return (
+    <AuthProvider>
       <Routes>
         <Route element={<ProtectedRoutes />}>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
           </Route>
         </Route>
-        <Route path="auth/" element={<AuthLayout />}>
+        <Route element={<AuthLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>
         <Route path="*" element={<h1>Not Found!</h1>} />
       </Routes>
+    </AuthProvider>
   );
 };
 export default App;
