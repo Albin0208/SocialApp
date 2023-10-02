@@ -2,6 +2,7 @@ import { Card, Container } from "react-bootstrap";
 import { baseUrl } from "../shared";
 import { useEffect, useState } from "react";
 import { CreatePost } from "../components/CreatePost.jsx";
+import { PostCard } from "../components/PostCard";
 
 export const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -23,6 +24,7 @@ export const Home = () => {
       }
 
       const data = await response.json();
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort posts by date
       setPosts(data);
       setIsLoading(false); // Mark loading as complete
     } catch (error) {
@@ -59,13 +61,13 @@ export const Home = () => {
     }
   };
 
+  // Fetch posts on page load
   useEffect(() => {
     fetchPosts();
   }, []);
 
   return (
     <>
-        <p className="text-center">Welcome to the Social App!</p>
         <CreatePost
           handleSubmit={handleSubmit}
           content={content}
@@ -77,12 +79,7 @@ export const Home = () => {
         ) : (
           <Container className="w-100 p-0">
             {posts.map(post => (
-              <Card className="mb-3 w-100" key={post._id}>
-                <Card.Body>
-                  <Card.Title>Card Title</Card.Title>
-                  <Card.Text>{post.content}</Card.Text>
-                </Card.Body>
-              </Card>
+              <PostCard key={post._id} post={post} />
             ))}
           </Container>
         )}

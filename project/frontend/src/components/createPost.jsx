@@ -1,24 +1,30 @@
-import { Button, Form } from "react-bootstrap";
+import React from "react";
+import { Button, Form, Row, Col } from "react-bootstrap";
 
 export const CreatePost = ({ handleSubmit, content, setContent }) => {
   return (
     <>
-      <Form onSubmit={handleSubmit} id="create_post_id">
-        <Form.Group controlId="content" className="mb-3">
-          <Form.Label>Content</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Content"
-            size="lg"
-            value={content}
-            onChange={e => {
-              setContent(e.target.value);
-            }}
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Create Post
-        </Button>
+      <Form id="tweet_form" onSubmit={handleSubmit}>
+        <Row>
+          <Col md={11}>
+            <Form.Group>
+              <Form.Control
+                as="textarea"
+                id="tweet"
+                style={{ resize: "none" }}
+                placeholder="What's happening?"
+                aria-label="With textarea"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+              />
+            </Form.Group>
+          </Col>
+          <Col md={1} className="ps-md-0 mt-2 mt-md-0">
+            <Button className="h-100 w-100" type="submit" variant="primary">
+              Post
+            </Button>
+          </Col>
+        </Row>
       </Form>
     </>
   );

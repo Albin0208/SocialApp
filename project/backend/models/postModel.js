@@ -13,6 +13,10 @@ const postSchema = new mongoose.Schema({
     trim: true,
     minLength: [3, "Content must be at least 3 characters long."],
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
   // author: {
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: "User",
