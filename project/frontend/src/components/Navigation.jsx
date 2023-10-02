@@ -1,23 +1,10 @@
 import React from "react";
-import {
-  Navbar,
-  Nav,
-  NavDropdown,
-  Form,
-  FormControl,
-  Button,
-} from "react-bootstrap";
+import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 import { useAuth } from "../utils/AuthContext";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 export const Navigation = () => {
   const { logoutUser } = useAuth();
-
-  // Function to handle the search action
-  const handleSearch = (e) => {
-    e.preventDefault();
-    // Implement your search logic here
-  };
 
   return (
     <>
@@ -32,8 +19,8 @@ export const Navigation = () => {
             <Nav.Link as={NavLink} to={"/friends"}>
               Friends
             </Nav.Link>
-            </Nav>
-            <Nav className="ms-auto">
+          </Nav>
+          <Nav className="ms-auto">
             <NavDropdown title={"Profile"} id="basic-nav-dropdown">
               <NavDropdown.Item as={NavLink} to={"/profile"}>
                 My Profile

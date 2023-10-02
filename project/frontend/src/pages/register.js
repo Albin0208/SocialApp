@@ -51,6 +51,11 @@ export const Register = () => {
                 value: 3,
                 message: "Username should be at least 3 characters long",
               },
+              pattern: {
+                value: /^[a-zA-Z0-9_]+$/,
+                message:
+                  "Username can only contain letters, numbers and underscore",
+              },
             })}
             isInvalid={!!errors.username}
           />
@@ -64,6 +69,7 @@ export const Register = () => {
           <Form.Control
             type="password"
             placeholder="Password"
+            autoComplete="new-password"
             size="lg"
             {...register("password", {
               required: "Password is required",
@@ -84,6 +90,7 @@ export const Register = () => {
           <Form.Control
             type="password"
             placeholder="Confirm Password"
+            autoComplete="new-password"
             size="lg"
             {...register("confirmPassword", {
               required: "Confirm Password is required",
