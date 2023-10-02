@@ -17,11 +17,11 @@ const postSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  // author: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "User",
-  //   required: [true, "Author is required."],
-  // },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: [true, "Author is required."],
+  },
 });
 
 const Post = mongoose.model("Post", postSchema);

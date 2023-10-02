@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [token, setToken] = useState(null);
+  const [user, setUser] = useState(localStorage.getItem("user"));
   const [successFulRegistration, setSuccessFulRegistration] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,9 @@ export const AuthProvider = ({ children }) => {
         // Handle successful login
         const responseData = await response.json();
         setToken(responseData.accessToken);
+        console.log("responseData", responseData.user);
+        setUser(responseData.user);
+        localStorage.setItem("user", JSON.stringify(responseData.user));
         setError(null);
       } else {
         // Handle login failure
@@ -102,9 +106,9 @@ export const AuthProvider = ({ children }) => {
 
   const contextData = {
     token,
+    user,
     error,
     successFulRegistration,
-    setToken,
     loading,
     registerUser,
     loginUser,

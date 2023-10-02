@@ -1,13 +1,17 @@
-import { Card, Container } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { baseUrl } from "../shared";
 import { useEffect, useState } from "react";
 import { CreatePost } from "../components/CreatePost.jsx";
 import { PostCard } from "../components/PostCard";
+import { useAuth } from "../utils/AuthContext";
 
 export const Home = () => {
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const { user } = useAuth();
+  console.log(user);
 
   const fetchPosts = async () => {
     try {
@@ -45,6 +49,7 @@ export const Home = () => {
         credentials: "include", // Send cookies along with the request
         body: JSON.stringify({
           content,
+          author: user._id,
         }),
       });
 

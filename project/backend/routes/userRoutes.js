@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, logoutUser } from '../controllers/userController.js';
+import { registerUser, loginUser, logoutUser, getUser } from '../controllers/userController.js';
 import { verifyJWT } from '../middleware/verifyJWT.js';
 import { handleRefreshToken } from '../controllers/refreshTokenController.js';
 
@@ -11,6 +11,7 @@ router.post('/login', loginUser);
 router.get('/refresh', handleRefreshToken);
 router.get('/logout', logoutUser)
 
+router.get('/:id', getUser)
 // Routes for protected resources
 router.use(verifyJWT);
 

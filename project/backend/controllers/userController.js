@@ -76,7 +76,7 @@ export const loginUser = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
-    res.status(200).json({ message: "Login successful", accessToken });
+    res.status(200).json({ message: "Login successful", accessToken, user });
   } catch (error) {
     // Handle errors, such as database errors
     res.status(500).json({ error: error.message });
@@ -111,5 +111,26 @@ export const logoutUser = (req, res) => {
   } catch (error) {
     console.error("Logout failed:", error);
     return res.status(500).json({ error: "Logout failed" });
+  }
+};
+
+/**
+ * Retrieves a user by ID, excluding their password.
+ *
+ * @function
+ * @async
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {string} req.params.id - The ID of the user to retrieve.
+ * @returns {Object} The user object, excluding the password.
+ * @throws {Object} Error object containing details of any errors that occurred.
+ */
+export const getUser = async (req, res) => {
+  try {
+    console.log("Getting user");
+    const user = await User.findById(req.params.id).select("-password"); // Get all info about the user except the password
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
