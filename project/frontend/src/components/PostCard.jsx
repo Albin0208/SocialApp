@@ -4,7 +4,6 @@ import { baseUrl } from "../shared";
 
 export const PostCard = ({ post }) => {
   const [author, setAuthor] = useState(null);
-  console.log(post.author);
 
   const fetchAuthor = async () => {
     try {
@@ -18,7 +17,7 @@ export const PostCard = ({ post }) => {
         setAuthor(authorData); // Set the author data once fetched
       } else {
         // Handle errors if needed
-        console.log(response);
+        // console.log(response);
         console.error("Error fetching author data");
       }
     } catch (error) {
@@ -29,7 +28,7 @@ export const PostCard = ({ post }) => {
 
   useEffect(() => {
     fetchAuthor(); // Fetch author data when the component mounts
-  }, [post.author]);
+  }, []);
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);

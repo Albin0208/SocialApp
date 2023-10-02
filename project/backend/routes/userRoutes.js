@@ -12,8 +12,8 @@ router.get('/refresh', handleRefreshToken);
 router.get('/logout', logoutUser)
 
 router.get('/:id', getUser)
-// Routes for protected resources
 router.use(verifyJWT);
+// Routes for protected resources
 
 
 
