@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Form, Button, Row, Col, Alert } from "react-bootstrap"; // Import Alert component
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../utils/AuthContext";
 
@@ -12,13 +12,17 @@ export const Login = () => {
   } = useForm();
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { token, loginUser, error } = useAuth();
 
 
   useEffect(() => {
     if (token) {
-      navigate("/");
+      if (location.state?.from)
+        navigate(location.state.from);
+      else
+        navigate("/");
     }
   }, [navigate, token]);
 
