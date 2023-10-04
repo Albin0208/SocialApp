@@ -24,26 +24,6 @@ export const Friends = () => {
 
       const data = await response.json();
       setCurrentUser(data);
-      // console.log(data);
-
-      // Fetch all posts from the user's posts array
-      // const friendPromises = data.friendRequests.map(async id => {
-      //   const postResponse = await fetch(baseUrl + "user/" + id, {
-      //     method: "GET",
-      //     credentials: "include", // Send cookies along with the request
-      //   });
-
-      //   if (!postResponse.ok) {
-      //     throw new Error(`HTTP Error! Status: ${postResponse.status}`);
-      //   }
-
-      //   return postResponse.json();
-      // });
-
-      // const friendsRequests = await Promise.all(friendPromises);
-      // setFriendRequests(friendsRequests);
-
-      // console.log(friendsRequests);
     } catch (error) {}
   };
 
@@ -68,46 +48,33 @@ export const Friends = () => {
     } catch (error) {}
   };
 
-  const handleRequest = async (e, requestId) => {
+  const handleRequest = async (e, requestId, accept = true) => {
     e.preventDefault();
 
     try {
-      if (e.target.innerHTML === "Accept") {
-        await fetch(baseUrl + "user/" + user._id, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Send cookies along with the request
-          body: JSON.stringify({
-            friendRequests: currentUser.friendRequests.filter(
-              user => user._id !== requestId
-            ),
-            friends: [
-              ...currentUser.friends.map(friend => friend._id),
-              requestId,
-            ],
-          }),
-        });
+      const updatedFriendRequests = currentUser.friendRequests.filter(user => user._id !== requestId);
+      const updatedFriends = accept ? [...currentUser.friends.map(friend => friend._id), requestId] : [...currentUser.friends];
 
-        fetchUser();
-      } else if (e.target.innerHTML === "Decline") {
-        await fetch(baseUrl + "user/" + user._id, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Send cookies along with the request
-          body: JSON.stringify({
-            friendRequests: currentUser.friendRequests.filter(
-              user => user._id !== requestId
-            ),
-          }),
-        });
+      const response = await fetch(`${baseUrl}user/${user._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          friendRequests: updatedFriendRequests,
+          friends: updatedFriends,
+        }),
+      });
 
-        fetchUser();
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
       }
-    } catch (error) {}
+
+      fetchUser();
+    } catch (error) {
+      console.error("Error handling friend request:", error);
+    }
   };
 
   return (
@@ -126,13 +93,13 @@ export const Friends = () => {
                     <Button
                       className="me-1"
                       variant="success"
-                      onClick={e => handleRequest(e, request._id)}
+                      onClick={e => handleRequest(e, request._id, true)}
                     >
                       Accept
                     </Button>
                     <Button
                       variant="danger"
-                      onClick={e => handleRequest(e, request._id)}
+                      onClick={e => handleRequest(e, request._id, false)}
                     >
                       Decline
                     </Button>
