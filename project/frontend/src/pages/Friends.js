@@ -24,26 +24,26 @@ export const Friends = () => {
 
       const data = await response.json();
       setCurrentUser(data);
-      console.log(data);
+      // console.log(data);
 
       // Fetch all posts from the user's posts array
-      const friendPromises = data.friendRequests.map(async id => {
-        const postResponse = await fetch(baseUrl + "user/" + id, {
-          method: "GET",
-          credentials: "include", // Send cookies along with the request
-        });
+      // const friendPromises = data.friendRequests.map(async id => {
+      //   const postResponse = await fetch(baseUrl + "user/" + id, {
+      //     method: "GET",
+      //     credentials: "include", // Send cookies along with the request
+      //   });
 
-        if (!postResponse.ok) {
-          throw new Error(`HTTP Error! Status: ${postResponse.status}`);
-        }
+      //   if (!postResponse.ok) {
+      //     throw new Error(`HTTP Error! Status: ${postResponse.status}`);
+      //   }
 
-        return postResponse.json();
-      });
+      //   return postResponse.json();
+      // });
 
-      const friendsRequests = await Promise.all(friendPromises);
-      setFriendRequests(friendsRequests);
+      // const friendsRequests = await Promise.all(friendPromises);
+      // setFriendRequests(friendsRequests);
 
-      console.log(friendsRequests);
+      // console.log(friendsRequests);
     } catch (error) {}
   };
 
@@ -73,7 +73,7 @@ export const Friends = () => {
 
     try {
       if (e.target.innerHTML === "Accept") {
-        const response = await fetch(baseUrl + "user/" + user._id, {
+        await fetch(baseUrl + "user/" + user._id, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -81,15 +81,31 @@ export const Friends = () => {
           credentials: "include", // Send cookies along with the request
           body: JSON.stringify({
             friendRequests: currentUser.friendRequests.filter(
-              id => id !== requestId
+              user => user._id !== requestId
             ),
-            friends: [...currentUser.friends, requestId],
+            friends: [
+              ...currentUser.friends.map(friend => friend._id),
+              requestId,
+            ],
           }),
         });
 
         fetchUser();
       } else if (e.target.innerHTML === "Decline") {
-      
+        await fetch(baseUrl + "user/" + user._id, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Send cookies along with the request
+          body: JSON.stringify({
+            friendRequests: currentUser.friendRequests.filter(
+              user => user._id !== requestId
+            ),
+          }),
+        });
+
+        fetchUser();
       }
     } catch (error) {}
   };
@@ -98,7 +114,7 @@ export const Friends = () => {
     <>
       <h1>Requests</h1>
       <Row>
-        {friendRequests.map(request => (
+        {currentUser?.friendRequests.map(request => (
           <Col md={4} key={request._id}>
             <Card>
               <Card.Body>
@@ -110,11 +126,14 @@ export const Friends = () => {
                     <Button
                       className="me-1"
                       variant="success"
-                      onClick={(e) => handleRequest(e, request._id)}
+                      onClick={e => handleRequest(e, request._id)}
                     >
                       Accept
                     </Button>
-                    <Button variant="danger" onClick={(e) => handleRequest(e, request._id)}>
+                    <Button
+                      variant="danger"
+                      onClick={e => handleRequest(e, request._id)}
+                    >
                       Decline
                     </Button>
                   </Col>
@@ -126,23 +145,26 @@ export const Friends = () => {
       </Row>
       <h1>Friends</h1>
       <Row>
-        {currentUser?.friends.map(request => (
-          <Col md={4} key={request._id}>
+        {currentUser?.friends.map(friend => (
+          <Col md={4} key={friend._id}>
             <Card>
               <Card.Body>
                 <Row>
                   <Col>
-                    <Card.Title>{request.username}</Card.Title>
+                    <Card.Title>{friend.username}</Card.Title>
                   </Col>
                   <Col>
                     <Button
                       className="me-1"
                       variant="success"
-                      onClick={(e) => handleRequest(e, request._id)}
+                      onClick={e => handleRequest(e, friend._id)}
                     >
                       Accept
                     </Button>
-                    <Button variant="danger" onClick={(e) => handleRequest(e, request._id)}>
+                    <Button
+                      variant="danger"
+                      onClick={e => handleRequest(e, friend._id)}
+                    >
                       Decline
                     </Button>
                   </Col>
