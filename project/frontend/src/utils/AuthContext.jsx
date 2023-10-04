@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }) => {
         credentials: "include",
       });
       if (response.ok) {
+        localStorage.removeItem("user");
         setToken(null);
       }
     } catch (error) {
