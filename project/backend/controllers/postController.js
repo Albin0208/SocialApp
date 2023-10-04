@@ -23,3 +23,14 @@ export const createPost = async (req, res) => {
     });
   }
 }
+
+export const getPostById = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(404).json({
+      message: error.message
+    });
+  }
+}

@@ -127,11 +127,25 @@ export const logoutUser = (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    console.log("Getting user");
-    console.log(req.params);
     const user = await User.findById(req.params.id).select("-password"); // Get all info about the user except the password
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const updateUser = async (req, res) => {
+  try {
+    console.log("Updating user");
+    console.log(req.body);
+    await User.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { new: true }
+    );
+
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
