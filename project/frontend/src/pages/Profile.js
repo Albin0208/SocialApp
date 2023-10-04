@@ -1,23 +1,26 @@
 import { useAuth } from "../utils/AuthContext";
-import { baseUrl} from "../shared";
+import { baseUrl } from "../shared";
 import { useEffect, useState } from "react";
 import { PostCard } from "../components/PostCard";
 import { CreatePost } from "../components/CreatePost";
-import { Alert } from "react-bootstrap";
+import { Alert, Button, Row, Col } from "react-bootstrap";
+import { useParams } from "react-router-dom";
 
-export const Profile = () => {
+export const Profile = ({ userId }) => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [friendButton, setFriendButton] = useState("Add Friend");
+  const [profileUser, setProfileUser] = useState(null);
+
+  const { id } = useParams();
 
   const fetchUser = async () => {
     setIsLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch(baseUrl + "user/" + user._id, {
+      const response = await fetch(baseUrl + "user/" + (id ? id : user._id), {
         method: "GET",
         credentials: "include", // Send cookies along with the request
       });
@@ -27,10 +30,25 @@ export const Profile = () => {
       }
 
       const data = await response.json();
+      setProfileUser(data);
+      console.log(data);
+
+      data.friendRequests.forEach(request => {
+        if (request === user._id) {
+          setFriendButton("Request Sent");
+        }
+      });
+
+      data.friends.forEach(friend => {
+        if (friend === user._id) {
+          setFriendButton("Remove Friend");
+        }
+      });
+
       const postIds = data.posts;
 
       // Fetch all posts from the user's posts array
-      const postPromises = postIds.map(async (postId) => {
+      const postPromises = postIds.map(async postId => {
         const postResponse = await fetch(baseUrl + "posts/" + postId, {
           method: "GET",
           credentials: "include", // Send cookies along with the request
@@ -63,14 +81,11 @@ export const Profile = () => {
     fetchUser();
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setTimeout(() => {
-      
-    }
-    , 5000);
+    setTimeout(() => {}, 5000);
     try {
       const response = await fetch(baseUrl + "posts/create", {
         method: "POST",
@@ -90,7 +105,7 @@ export const Profile = () => {
         setContent("");
         // Update the state with the new post
         setPosts([data, ...posts]);
-        await fetch(baseUrl + "user/" + user._id, {
+        await fetch(baseUrl + "user/" + profileUser._id, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -112,10 +127,52 @@ export const Profile = () => {
     }
   };
 
+  const handleFriendRequest = async () => {
+    try {
+      const response = await fetch(baseUrl + "user/" + profileUser._id, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Send cookies along with the request
+        body: JSON.stringify({
+          friendRequests: [...profileUser.friendRequests, user._id],
+        }),
+      });
+
+      console.log(response);
+
+      if (response.ok) {
+        setFriendButton("Request Sent");
+        console.log("Friend request sent");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+
   return (
     <>
-      <h1>{user.username}</h1>
-      <h2>Posts</h2>
+      <Row>
+        <Col>
+          <h1>{profileUser?.username}</h1>
+          <h2>Posts</h2>
+        </Col>
+        {id !== user._id && (
+          <Col md={2}>
+            <Button
+              className="w-100"
+              variant="primary"
+              onClick={handleFriendRequest}
+            >
+              {friendButton}
+              {/* Add Friend */}
+              {/* Request Sent */}
+              {/* Remove Friend */}
+            </Button>
+          </Col>
+        )}
+      </Row>
       <hr />
       <CreatePost
         handleSubmit={handleSubmit}
@@ -124,7 +181,7 @@ export const Profile = () => {
       />
       {isLoading && <p>Loading...</p>}
       {error && <Alert variant="danger">{error}</Alert>}
-      {posts.map((post) => (
+      {posts.map(post => (
         <PostCard key={post._id} post={post} />
       ))}
     </>

@@ -4,7 +4,6 @@ import { useAuth } from "./AuthContext";
 export const ProtectedRoutes = () => {
   const location = useLocation();
   const { token } = useAuth();
-  console.log("token", token);
   return token ? (
     <Outlet />
   ) : (

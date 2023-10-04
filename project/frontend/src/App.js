@@ -7,6 +7,8 @@ import { AuthLayout } from "./components/AuthLayout.jsx";
 import { ProtectedRoutes } from "./utils/ProtectedRoutes.jsx";
 import { AuthProvider } from "./utils/AuthContext";
 import { Profile } from "./pages/Profile.js";
+import { NotFound } from "./pages/NotFound.js";
+import { Friends } from "./pages/Friends.js";
 
 const App = () => {
   return (
@@ -15,14 +17,15 @@ const App = () => {
         <Route element={<ProtectedRoutes />}>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="profile" element={<Profile />} />
+            <Route path="profile/:id?" element={<Profile />} />
+            <Route path="friends" element={<Friends />} />
           </Route>
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>
-        <Route path="*" element={<h1>Not Found!</h1>} />
+          <Route path="*" element={<NotFound />} />
       </Routes>
     </AuthProvider>
   );

@@ -127,7 +127,10 @@ export const logoutUser = (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password"); // Get all info about the user except the password
+    const user = await User.findById(req.params.id).populate({
+      path: 'friends friendRequests sentRequests',
+      select: '-password'})
+      .select("-password"); // Get all info about the user except the password
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -145,6 +148,18 @@ export const updateUser = async (req, res) => {
     );
 
     res.sendStatus(200);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const findUser = async (req, res) => {
+  try {
+    const regex = new RegExp(req.params.username, "i");
+
+    const user = await User.find({ username: regex }).populate().select("-password -posts");
+    // const user = await User.findOne({ username: req.params.username }).select("-password");
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

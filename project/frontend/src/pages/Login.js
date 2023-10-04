@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Form, Button, Row, Col, Alert } from "react-bootstrap"; // Import Alert component
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -24,7 +24,7 @@ export const Login = () => {
       else
         navigate("/");
     }
-  }, [navigate, token]);
+  }, []);
 
   const onSubmit = async data => {
     try {
