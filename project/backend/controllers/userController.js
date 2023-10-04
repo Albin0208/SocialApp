@@ -128,6 +128,7 @@ export const logoutUser = (req, res) => {
 export const getUser = async (req, res) => {
   try {
     console.log("Getting user");
+    console.log(req.params);
     const user = await User.findById(req.params.id).select("-password"); // Get all info about the user except the password
     res.status(200).json(user);
   } catch (error) {

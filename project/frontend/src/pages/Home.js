@@ -11,7 +11,6 @@ export const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const { user } = useAuth();
-  console.log(user);
 
   const fetchPosts = async () => {
     try {

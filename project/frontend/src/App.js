@@ -6,6 +6,7 @@ import { MainLayout } from "./components/MainLayout.jsx";
 import { AuthLayout } from "./components/AuthLayout.jsx";
 import { ProtectedRoutes } from "./utils/ProtectedRoutes.jsx";
 import { AuthProvider } from "./utils/AuthContext";
+import { Profile } from "./pages/Profile.js";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route element={<ProtectedRoutes />}>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
         <Route element={<AuthLayout />}>

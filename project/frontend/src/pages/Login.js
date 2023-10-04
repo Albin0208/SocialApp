@@ -15,6 +15,7 @@ export const Login = () => {
 
   const { token, loginUser, error } = useAuth();
 
+
   useEffect(() => {
     if (token) {
       navigate("/");

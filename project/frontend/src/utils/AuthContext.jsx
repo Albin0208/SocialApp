@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [token, setToken] = useState(null);
-  const [user, setUser] = useState(localStorage.getItem("user"));
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
   const [successFulRegistration, setSuccessFulRegistration] = useState(false);
 
   useEffect(() => {
@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const registerUser = async userInfo => {
+    setError(null);
     // Send the registration data to the server
     try {
       const response = await fetch(baseUrl + "user/register", {
