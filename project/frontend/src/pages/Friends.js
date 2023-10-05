@@ -1,8 +1,8 @@
+import axios from "../api/axios";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button, Col, Row, Card } from "react-bootstrap";
+import { Col, Row, Card } from "react-bootstrap";
 import { useAuth } from "../utils/AuthContext";
-import { baseUrl } from "../shared";
 import { FriendRequests } from "../components/FriendRequests";
 import { SearchForm } from "../components/SearchForm";
 
@@ -12,40 +12,34 @@ export const Friends = () => {
   const [users, setUsers] = useState([]);
   const [content, setContent] = useState("");
 
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   const fetchUser = async () => {
     try {
-      const response = await fetch(`${baseUrl}user/${user._id}`, {
-        method: "GET",
-        credentials: "include",
+      const response = await axios.get(`user/${user._id}`, {
+        withCredentials: true,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
+      if (response.status === 200) {
+        setCurrentUser(response.data);
+      } else {
+        throw new Error(`Failed to fetch user data: ${response.data.error}`);
       }
-
-      const data = await response.json();
-      setCurrentUser(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const response = await fetch(`${baseUrl}user/username/${content}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
+      const response = await axios.get(`user/username/${content}`, {
+        withCredentials: true,
       });
 
-      const data = await response.json();
+      const data = response.data;
       setUsers(data);
     } catch (error) {
       console.error("Error searching for friends:", error);
@@ -63,23 +57,18 @@ export const Friends = () => {
         ? [...currentUser.friends.map(friend => friend._id), requestId]
         : [...currentUser.friends];
 
-      const response = await fetch(`${baseUrl}user/${user._id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          friendRequests: updatedFriendRequests,
-          friends: updatedFriends,
-        }),
+      const response = await axios.patch(`user/${user._id}`, {
+        friendRequests: updatedFriendRequests,
+        friends: updatedFriends,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
+      if (response.data.success) {
+        fetchUser();
+      } else {
+        throw new Error(
+          `Failed to handle friend request: ${response.data.error}`
+        );
       }
-
-      fetchUser();
     } catch (error) {
       console.error("Error handling friend request:", error);
     }

@@ -1,3 +1,4 @@
+import axios from "../api/axios";
 import { Container } from "react-bootstrap";
 import { baseUrl } from "../shared";
 import { useEffect, useState } from "react";
@@ -14,51 +15,38 @@ export const Home = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch(baseUrl + "posts", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Send cookies along with the request
+      const response = await axios.get("posts", {
+        withCredentials: true,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
+  
+      if (response.status === 200) {
+        const data = response.data;
+        data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort posts by date
+        setPosts(data);
+        setIsLoading(false); // Mark loading as complete
+      } else {
+        throw new Error(`Failed to fetch posts: ${response.data.error}`);
       }
-
-      const data = await response.json();
-      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort posts by date
-      setPosts(data);
-      setIsLoading(false); // Mark loading as complete
     } catch (error) {
       console.error("Error:", error);
       setIsLoading(false); // Mark loading as complete even in case of an error
     }
   };
-
-  const handleSubmit = async e => {
+  
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
-      const response = await fetch(baseUrl + "posts/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Send cookies along with the request
-        body: JSON.stringify({
-          content,
-          author: user._id,
-        }),
+      const response = await axios.post("posts/create", {
+        content,
+        author: user._id,
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
+  
+      if (response.data.success) {
         setContent("");
         fetchPosts();
       } else {
-        console.error("Post creation failed.", data);
+        console.error("Post creation failed.", response.data.error);
       }
     } catch (error) {
       console.error("An error occurred:", error);

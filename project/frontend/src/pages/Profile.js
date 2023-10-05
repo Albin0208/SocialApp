@@ -1,13 +1,15 @@
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Alert, Button, Row, Col } from "react-bootstrap";
+import axios from "../api/axios";
+import { FriendButton } from "../components/FriendButton";
 import { useAuth } from "../utils/AuthContext";
-import { baseUrl } from "../shared";
-import { useEffect, useState } from "react";
 import { PostCard } from "../components/PostCard";
 import { CreatePost } from "../components/CreatePost";
-import { Alert, Button, Row, Col } from "react-bootstrap";
-import { useParams } from "react-router-dom";
 
-export const Profile = ({ userId }) => {
+export const Profile = () => {
   const { user } = useAuth();
+  const { id } = useParams();
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -15,32 +17,34 @@ export const Profile = ({ userId }) => {
   const [friendButton, setFriendButton] = useState("Add Friend");
   const [profileUser, setProfileUser] = useState(null);
 
-  const { id } = useParams();
+  useEffect(() => {
+    fetchUser();
+  }, [id]);
 
   const fetchUser = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(baseUrl + "user/" + (id ? id : user._id), {
-        method: "GET",
-        credentials: "include", // Send cookies along with the request
+      const response = await axios.get(`user/${id || user._id}`, {
+        withCredentials: true,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
+      if (response.status !== 200) {
+        throw new Error("User not found");
       }
 
-      const data = await response.json();
+      const data = response.data;
       setProfileUser(data);
-      console.log(data);
 
+      // Check friend requests and friends
+      console.log(data.friendRequests);
       data.friendRequests.forEach(request => {
-        if (request === user._id) {
+        if (request._id === user._id) {
           setFriendButton("Request Sent");
         }
       });
 
       data.friends.forEach(friend => {
-        if (friend === user._id) {
+        if (friend._id === user._id) {
           setFriendButton("Remove Friend");
         }
       });
@@ -49,16 +53,15 @@ export const Profile = ({ userId }) => {
 
       // Fetch all posts from the user's posts array
       const postPromises = postIds.map(async postId => {
-        const postResponse = await fetch(baseUrl + "posts/" + postId, {
-          method: "GET",
-          credentials: "include", // Send cookies along with the request
+        const postResponse = await axios.get(`posts/${postId}`, {
+          withCredentials: true,
         });
 
-        if (!postResponse.ok) {
-          throw new Error(`HTTP Error! Status: ${postResponse.status}`);
+        if (postResponse.status !== 200) {
+          throw new Error("Failed to fetch posts");
         }
 
-        return postResponse.json();
+        return postResponse.data;
       });
 
       // Resolve all the promises to get an array of posts
@@ -70,84 +73,39 @@ export const Profile = ({ userId }) => {
       // Store the fetched and sorted posts in a state variable
       setPosts(userPosts);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error:", error.message);
       setError(error.message);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
 
   const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setTimeout(() => {}, 5000);
     try {
-      const response = await fetch(baseUrl + "posts/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Send cookies along with the request
-        body: JSON.stringify({
-          content,
-          author: user._id,
-        }),
+      const response = await axios.post("posts/create", {
+        content,
+        author: user._id,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 201) {
         setContent("");
         // Update the state with the new post
-        setPosts([data, ...posts]);
-        await fetch(baseUrl + "user/" + profileUser._id, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Send cookies along with the request
-          body: JSON.stringify({
-            posts: [...posts, data._id],
-          }),
+        setPosts([response.data, ...posts]);
+        await axios.patch(`user/${profileUser._id}`, {
+          posts: [...posts, response.data._id],
         });
       } else {
-        console.error("Post creation failed.", data);
+        console.error("Post creation failed.");
         setError("Post creation failed.");
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("An error occurred:", error.message);
       setError(error.message);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleFriendRequest = async () => {
-    try {
-      const response = await fetch(baseUrl + "user/" + profileUser._id, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Send cookies along with the request
-        body: JSON.stringify({
-          friendRequests: [...profileUser.friendRequests, user._id],
-        }),
-      });
-
-      console.log(response);
-
-      if (response.ok) {
-        setFriendButton("Request Sent");
-        console.log("Friend request sent");
-      }
-    } catch (error) {
-      console.error("An error occurred:", error);
     }
   };
 
@@ -158,18 +116,9 @@ export const Profile = ({ userId }) => {
           <h1>{profileUser?.username}</h1>
           <h2>Posts</h2>
         </Col>
-        {id !== user._id && (
+        {id && (
           <Col md={2}>
-            <Button
-              className="w-100"
-              variant="primary"
-              onClick={handleFriendRequest}
-            >
-              {friendButton}
-              {/* Add Friend */}
-              {/* Request Sent */}
-              {/* Remove Friend */}
-            </Button>
+            <FriendButton profileUser={profileUser} currentUser={user} />
           </Col>
         )}
       </Row>
@@ -179,7 +128,7 @@ export const Profile = ({ userId }) => {
         content={content}
         setContent={setContent}
       />
-      {isLoading && <p>Loading...</p>}
+      {isLoading ? <p>Loading...</p> : null}
       {error && <Alert variant="danger">{error}</Alert>}
       {posts.map(post => (
         <PostCard key={post._id} post={post} />
