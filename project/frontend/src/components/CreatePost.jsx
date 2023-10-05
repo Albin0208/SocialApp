@@ -4,7 +4,7 @@ import { Button, Form, Row, Col } from "react-bootstrap";
 export const CreatePost = ({ handleSubmit, content, setContent }) => {
   return (
     <>
-      <Form id="tweet_form" onSubmit={handleSubmit}>
+      <Form id="tweet_form" onSubmit={handleSubmit} className="mb-3">
         <Row>
           <Col md={11}>
             <Form.Group>
@@ -15,12 +15,17 @@ export const CreatePost = ({ handleSubmit, content, setContent }) => {
                 placeholder="What's happening?"
                 aria-label="With textarea"
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={e => setContent(e.target.value)}
               />
             </Form.Group>
           </Col>
           <Col md={1} className="ps-md-0 mt-2 mt-md-0">
-            <Button className="h-100 w-100" type="submit" variant="primary">
+            <Button
+              className="h-100 w-100"
+              type="submit"
+              variant="primary"
+              disabled={!content} // Disable button when content is empty
+            >
               Post
             </Button>
           </Col>
