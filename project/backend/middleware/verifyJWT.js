@@ -2,12 +2,9 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 
 export const verifyJWT = (req, res, next) => {
-  console.log(req.headers);
-  const authToken = req.headers["x-access-token"];
+  const authToken = req.headers["authorization"];
   if (!authToken)
     return res.status(401).json({ error: "Authentication required." });
-
-  console.log(authToken);
 
   const token = authToken.split(" ")[1];
 

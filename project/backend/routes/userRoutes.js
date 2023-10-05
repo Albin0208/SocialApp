@@ -18,10 +18,10 @@ router.post("/login", loginUser);
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logoutUser);
 
-router.patch("/:id", updateUser);
-router.get("/:id", getUser);
-router.get("/username/:username", findUser)
-router.use(verifyJWT);
 // Routes for protected resources
+router.use(verifyJWT);
+router.patch("/:id", updateUser);
+router.get("/username/:username", findUser)
+router.get("/:id", getUser);
 
 export default router;

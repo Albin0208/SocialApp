@@ -1,4 +1,3 @@
-import React from "react";
 import { Button, Form, Row, Col } from "react-bootstrap";
 
 export const CreatePost = ({ handleSubmit, content, setContent }) => {

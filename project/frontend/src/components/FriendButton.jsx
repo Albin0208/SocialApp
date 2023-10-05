@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import axios from "../api/axios";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
 export const FriendButton = ({ profileUser, currentUser }) => {
   const [buttonText, setButtonText] = useState("Add Friend");
+  const axiosPrivate = useAxiosPrivate();
 
   useEffect(() => {
     if (profileUser?.friends.some(friend => friend._id === currentUser._id)) {
@@ -21,7 +22,7 @@ export const FriendButton = ({ profileUser, currentUser }) => {
 
   const sendFriendRequest = async () => {
     try {
-      const response = await axios.patch(`user/${profileUser._id}`, {
+      const response = await axiosPrivate.patch(`user/${profileUser._id}`, {
         friendRequests: [...profileUser.friendRequests, currentUser._id],
       });
   
@@ -40,7 +41,7 @@ export const FriendButton = ({ profileUser, currentUser }) => {
         request => request._id !== currentUser._id
       );
   
-      const response = await axios.patch(`user/${profileUser._id}`, {
+      const response = await axiosPrivate.patch(`user/${profileUser._id}`, {
         friendRequests: updatedFriendRequests,
       });
   
@@ -55,7 +56,7 @@ export const FriendButton = ({ profileUser, currentUser }) => {
   
   const removeFriend = async () => {
     try {
-      const response = await axios.patch(`user/${profileUser._id}`, {
+      const response = await axiosPrivate.patch(`user/${profileUser._id}`, {
         friends: profileUser.friends.filter(
           friendId => friendId !== currentUser._id
         ),
@@ -108,7 +109,7 @@ export const FriendButton = ({ profileUser, currentUser }) => {
               request => request !== profileUser._id
             );
   
-      const response = await axios.patch(`user/${currentUser._id}`, {
+      const response = await axiosPrivate.patch(`user/${currentUser._id}`, {
         sentRequests: updatedSentRequests,
       });
   

@@ -1,4 +1,4 @@
-import axios from "../api/axios";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Col, Row, Card } from "react-bootstrap";
@@ -8,6 +8,7 @@ import { SearchForm } from "../components/SearchForm";
 
 export const Friends = () => {
   const { user } = useAuth();
+  const axiosPrivate = useAxiosPrivate();
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [content, setContent] = useState("");
@@ -18,7 +19,7 @@ export const Friends = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`user/${user._id}`, {
+      const response = await axiosPrivate.get(`user/${user._id}`, {
         withCredentials: true,
       });
 
@@ -35,7 +36,7 @@ export const Friends = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const response = await axios.get(`user/username/${content}`, {
+      const response = await axiosPrivate.get(`user/username/${content}`, {
         withCredentials: true,
       });
 
@@ -57,7 +58,7 @@ export const Friends = () => {
         ? [...currentUser.friends.map(friend => friend._id), requestId]
         : [...currentUser.friends];
 
-      const response = await axios.patch(`user/${user._id}`, {
+      const response = await axiosPrivate.patch(`user/${user._id}`, {
         friendRequests: updatedFriendRequests,
         friends: updatedFriends,
       });

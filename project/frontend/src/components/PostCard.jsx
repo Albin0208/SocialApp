@@ -1,13 +1,14 @@
-import axios from "../api/axios";
-import React, { useState, useEffect } from "react";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
+import { useState, useEffect } from "react";
 import { Card } from "react-bootstrap";
 
 export const PostCard = ({ post }) => {
   const [author, setAuthor] = useState(null);
+  const axiosPrivate = useAxiosPrivate();
 
   const fetchAuthor = async () => {
     try {
-      const response = await axios.get("user/" + post.author, {
+      const response = await axiosPrivate.get("user/" + post.author, {
         withCredentials: true,
       });
   

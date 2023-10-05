@@ -104,6 +104,7 @@ export const AuthProvider = ({ children }) => {
 
   const contextData = {
     token,
+    setToken,
     user,
     error,
     successFulRegistration,

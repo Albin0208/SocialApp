@@ -23,8 +23,8 @@ app.use(cookieParser())
 
 // Mount API routes
 app.use("/user", userRoutes);
-app.use("/posts", postRoutes);
 app.use(verifyJWT); // Protect all routes below this line
+app.use("/posts", postRoutes);
 
 
 /**

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Alert, Row, Col } from "react-bootstrap";
-import axios from "../api/axios";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { FriendButton } from "../components/FriendButton";
 import { useAuth } from "../utils/AuthContext";
 import { PostCard } from "../components/PostCard";
@@ -10,6 +10,7 @@ import { CreatePost } from "../components/CreatePost";
 export const Profile = () => {
   const { user } = useAuth();
   const { id } = useParams();
+  const axiosPrivate = useAxiosPrivate();
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +24,7 @@ export const Profile = () => {
   const fetchUser = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`user/${id || user._id}`, {
+      const response = await axiosPrivate.get(`user/${id || user._id}`, {
         withCredentials: true,
       });
 
@@ -38,7 +39,7 @@ export const Profile = () => {
 
       // Fetch all posts from the user's posts array
       const postPromises = postIds.map(async postId => {
-        const postResponse = await axios.get(`posts/${postId}`, {
+        const postResponse = await axiosPrivate.get(`posts/${postId}`, {
           withCredentials: true,
         });
 
@@ -70,7 +71,7 @@ export const Profile = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.post("posts/create", {
+      const response = await axiosPrivate.post("posts/create", {
         content,
         author: user._id,
       });
@@ -79,7 +80,7 @@ export const Profile = () => {
         setContent("");
         // Update the state with the new post
         setPosts([response.data, ...posts]);
-        await axios.patch(`user/${profileUser._id}`, {
+        await axiosPrivate.patch(`user/${profileUser._id}`, {
           posts: [...posts, response.data._id],
         });
       } else {

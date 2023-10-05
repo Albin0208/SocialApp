@@ -1,20 +1,21 @@
-import axios from "../api/axios";
 import { Container } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { CreatePost } from "../components/CreatePost.jsx";
 import { PostCard } from "../components/PostCard";
 import { useAuth } from "../utils/AuthContext";
+import useAxiosPrivate from "../utils/useAxiosPrivate";
 
 export const Home = () => {
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-
+  
   const { user } = useAuth();
+  const axiosPrivate = useAxiosPrivate();
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get("posts", {
+      const response = await axiosPrivate.get("posts", {
         withCredentials: true,
       });
   
@@ -36,12 +37,12 @@ export const Home = () => {
     e.preventDefault();
   
     try {
-      const response = await axios.post("posts/create", {
+      const response = await axiosPrivate.post("posts/create", {
         content,
         author: user._id,
       });
   
-      if (response.data.success) {
+      if (response.status === 201) {
         setContent("");
         fetchPosts();
       } else {
