@@ -21,21 +21,18 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ error: "Password is required." });
     const password = hashPassword(req.body.password);
 
+    // Check if user already exists
+    if (await User.findOne({ username }))
+      return res.status(400).json({ error: "Username already exists." });
+
     const user = await User.create({ username, password });
 
-    // Respond with a success status code and the user data
     res.status(201).json(user);
   } catch (error) {
-    if (error.code === 11000) {
-      // MongoDB duplicate key error (unique constraint violation)
-      res.status(400).json({ error: "Username already exists." });
-    } else {
-      // Other errors (database errors, unexpected errors)
       res.status(500).json({
         error: "Registration failed. Please try again later.",
         message: error.message,
       });
-    }
   }
 };
 
@@ -76,7 +73,17 @@ export const loginUser = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
-    res.status(200).json({ message: "Login successful", accessToken, user });
+    // Create a user object without the password field
+    const userWithoutPassword = { ...user.toObject() };
+    delete userWithoutPassword.password;
+
+    res
+      .status(200)
+      .json({
+        message: "Login successful",
+        accessToken,
+        user: userWithoutPassword,
+      });
   } catch (error) {
     // Handle errors, such as database errors
     res.status(500).json({ error: error.message });
@@ -127,9 +134,11 @@ export const logoutUser = (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate({
-      path: 'friends friendRequests sentRequests',
-      select: '-password'})
+    const user = await User.findById(req.params.id)
+      .populate({
+        path: "friends friendRequests sentRequests",
+        select: "-password",
+      })
       .select("-password"); // Get all info about the user except the password
     res.status(200).json(user);
   } catch (error) {
@@ -139,8 +148,6 @@ export const getUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    console.log("Updating user");
-    console.log(req.body);
     await User.findOneAndUpdate(
       { _id: req.params.id },
       { $set: req.body },
@@ -151,16 +158,18 @@ export const updateUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
 export const findUser = async (req, res) => {
   try {
     const regex = new RegExp(req.params.username, "i");
 
-    const user = await User.find({ username: regex }).populate().select("-password -posts");
+    const user = await User.find({ username: regex })
+      .populate()
+      .select("-password -posts");
     // const user = await User.findOne({ username: req.params.username }).select("-password");
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
