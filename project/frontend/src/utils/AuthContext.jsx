@@ -1,7 +1,6 @@
 import axios from "../api/axios";
 
 import { useContext, useState, useEffect, createContext } from "react";
-import { baseUrl } from "../shared";
 
 const AuthContext = createContext();
 

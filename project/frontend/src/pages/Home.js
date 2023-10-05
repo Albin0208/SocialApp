@@ -1,6 +1,5 @@
 import axios from "../api/axios";
 import { Container } from "react-bootstrap";
-import { baseUrl } from "../shared";
 import { useEffect, useState } from "react";
 import { CreatePost } from "../components/CreatePost.jsx";
 import { PostCard } from "../components/PostCard";
