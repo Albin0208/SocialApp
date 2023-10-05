@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button, Col, Row, Card } from "react-bootstrap";
@@ -14,16 +15,15 @@ export const Friends = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await fetch(`${baseUrl}user/${user._id}`, {
-        method: "GET",
-        credentials: "include",
+      const response = await axios.get(`${baseUrl}user/${user._id}`, {
+        withCredentials: true,
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = response.data;
       setCurrentUser(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -37,15 +37,14 @@ export const Friends = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const response = await fetch(`${baseUrl}user/username/${content}`, {
-        method: "GET",
+      const response = await axios.get(`${baseUrl}user/username/${content}`, {
+        withCredentials: true,
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
       });
 
-      const data = await response.json();
+      const data = response.data;
       setUsers(data);
     } catch (error) {
       console.error("Error searching for friends:", error);
@@ -63,19 +62,21 @@ export const Friends = () => {
         ? [...currentUser.friends.map(friend => friend._id), requestId]
         : [...currentUser.friends];
 
-      const response = await fetch(`${baseUrl}user/${user._id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
+      const response = await axios.patch(
+        `${baseUrl}user/${user._id}`,
+        {
           friendRequests: updatedFriendRequests,
           friends: updatedFriends,
-        }),
-      });
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
 

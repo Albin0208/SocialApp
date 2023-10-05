@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+
+import axios from "axios";
+import { useState, useEffect } from "react";
 import { Card } from "react-bootstrap";
 import { baseUrl } from "../shared";
 
@@ -7,21 +9,17 @@ export const PostCard = ({ post }) => {
 
   const fetchAuthor = async () => {
     try {
-      const response = await fetch(baseUrl + "user/" + post.author, {
-        method: "GET",
-        credentials: "include",
+      const response = await axios.get(baseUrl + "user/" + post.author, {
+        withCredentials: true,
       });
-
-      if (response.ok) {
-        const authorData = await response.json();
-        setAuthor(authorData); // Set the author data once fetched
+  
+      if (response.status === 200) {
+        const authorData = response.data;
+        setAuthor(authorData);
       } else {
-        // Handle errors if needed
-        // console.log(response);
         console.error("Error fetching author data");
       }
     } catch (error) {
-      // Handle network or other errors
       console.error("An error occurred while fetching author data", error);
     }
   };
