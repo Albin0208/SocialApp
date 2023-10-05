@@ -146,4 +146,14 @@ describe("User routes", () => {
         });
     });
   });
+
+  describe("User/logout", () => {
+    it("should return 200 and clear the refreshToken cookie", done => {
+      superagent.get(API_URL + "/user/logout").end((err, res) => {
+        assert.equal(res.status, 200);
+        assert.equal(res.headers["set-cookie"][0].includes("refreshToken=;"), true);
+        done();
+      });
+    })
+  });
 });
