@@ -1,28 +1,27 @@
-import { Form, Row, Col, Button } from "react-bootstrap";
+import React from "react";
+import { Form, Button, InputGroup } from "react-bootstrap";
 
 export const SearchForm = ({ content, setContent, handleSubmit }) => {
   return (
-    <Form id="tweet_form" onSubmit={handleSubmit}>
-      <Row>
-        <Col md={11}>
-          <Form.Group>
-            <Form.Control
-              type="text"
-              id="tweet"
-              style={{ resize: "none" }}
-              placeholder="Find Friends..."
-              aria-label="With textarea"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={1} className="ps-md-0 mt-2 mt-md-0">
-          <Button className="h-100 w-100" type="submit" variant="primary">
-            Search
-          </Button>
-        </Col>
-      </Row>
+    <Form id="search_form" onSubmit={handleSubmit}>
+      <InputGroup className="mb-3">
+        <Form.Control
+          type="text"
+          id="search"
+          style={{ resize: "none" }}
+          placeholder="Find Friends..."
+          aria-label="Find Friends"
+          value={content}
+          onChange={e => setContent(e.target.value)}
+        />
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={!content} // Disable button when content is empty
+        >
+          Search
+        </Button>
+      </InputGroup>
     </Form>
   );
-}
+};

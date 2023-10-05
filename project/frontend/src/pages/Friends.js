@@ -117,7 +117,7 @@ export const Friends = () => {
       <h1>Friends</h1>
       <p>Friends page</p>
       {users.map(user => (
-        <Card>
+        <Card key={user._id}>
           <Link
             to={`/profile/${user._id}`}
             style={{ textDecoration: "none", color: "inherit" }}

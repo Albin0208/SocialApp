@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Alert, Button, Row, Col } from "react-bootstrap";
+import { Alert, Row, Col } from "react-bootstrap";
 import axios from "../api/axios";
 import { FriendButton } from "../components/FriendButton";
 import { useAuth } from "../utils/AuthContext";
@@ -14,7 +14,6 @@ export const Profile = () => {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [friendButton, setFriendButton] = useState("Add Friend");
   const [profileUser, setProfileUser] = useState(null);
 
   useEffect(() => {
@@ -34,20 +33,6 @@ export const Profile = () => {
 
       const data = response.data;
       setProfileUser(data);
-
-      // Check friend requests and friends
-      console.log(data.friendRequests);
-      data.friendRequests.forEach(request => {
-        if (request._id === user._id) {
-          setFriendButton("Request Sent");
-        }
-      });
-
-      data.friends.forEach(friend => {
-        if (friend._id === user._id) {
-          setFriendButton("Remove Friend");
-        }
-      });
 
       const postIds = data.posts;
 
@@ -128,7 +113,7 @@ export const Profile = () => {
         content={content}
         setContent={setContent}
       />
-      {isLoading ? <p>Loading...</p> : null}
+      {isLoading && <p>Loading...</p>}
       {error && <Alert variant="danger">{error}</Alert>}
       {posts.map(post => (
         <PostCard key={post._id} post={post} />
