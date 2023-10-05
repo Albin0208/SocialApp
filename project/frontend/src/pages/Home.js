@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Container } from "react-bootstrap";
 import { baseUrl } from "../shared";
 import { useEffect, useState } from "react";
@@ -15,18 +14,19 @@ export const Home = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get(baseUrl + "posts", {
-        withCredentials: true, // Send cookies along with the request
+      const response = await fetch(baseUrl + "posts", {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Send cookies along with the request
       });
 
-      if (response.status !== 200) {
+      if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
 
-      const data = response.data;
+      const data = await response.json();
       data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort posts by date
       setPosts(data);
       setIsLoading(false); // Mark loading as complete
@@ -40,23 +40,21 @@ export const Home = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        baseUrl + "posts/create",
-        {
+      const response = await fetch(baseUrl + "posts/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Send cookies along with the request
+        body: JSON.stringify({
           content,
           author: user._id,
-        },
-        {
-          withCredentials: true, // Send cookies along with the request
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+        }),
+      });
 
-      const data = response.data;
+      const data = await response.json();
 
-      if (response.status === 200) {
+      if (response.ok) {
         setContent("");
         fetchPosts();
       } else {
@@ -74,21 +72,21 @@ export const Home = () => {
 
   return (
     <>
-      <CreatePost
-        handleSubmit={handleSubmit}
-        content={content}
-        setContent={setContent}
-      />
-      <hr />
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <Container className="w-100 p-0">
-          {posts.map(post => (
-            <PostCard key={post._id} post={post} />
-          ))}
-        </Container>
-      )}
+        <CreatePost
+          handleSubmit={handleSubmit}
+          content={content}
+          setContent={setContent}
+        />
+        <hr />
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <Container className="w-100 p-0">
+            {posts.map(post => (
+              <PostCard key={post._id} post={post} />
+            ))}
+          </Container>
+        )}
     </>
   );
 };
