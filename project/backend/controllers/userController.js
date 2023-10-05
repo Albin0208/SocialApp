@@ -90,6 +90,7 @@ export const loginUser = async (req, res) => {
 
 /**
  * Logs out the user by clearing the refreshToken cookie.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @returns {Object} - The response object with a success status code or an error message.
@@ -122,8 +123,6 @@ export const logoutUser = (req, res) => {
 /**
  * Retrieves a user by ID, excluding their password.
  *
- * @function
- * @async
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @param {string} req.params.id - The ID of the user to retrieve.
@@ -132,11 +131,10 @@ export const logoutUser = (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id, "-password")
-      .populate({
-        path: "friends friendRequests sentRequests",
-        select: "-password",
-      }); // Get all info about the user except the password
+    const user = await User.findById(req.params.id, "-password").populate({
+      path: "friends friendRequests sentRequests",
+      select: "-password",
+    }); // Get all info about the user except the password
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -151,13 +149,16 @@ export const getUser = async (req, res) => {
   }
 };
 
+/**
+ * Updates a user by ID.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @throws {Error} - If there is an error updating the user.
+ */
 export const updateUser = async (req, res) => {
   try {
-    await User.findOneAndUpdate(
-      { _id: req.params.id },
-      { $set: req.body },
-      { new: true }
-    );
+    await User.findOneAndUpdate({ _id: req.params.id }, { $set: req.body });
 
     res.sendStatus(200);
   } catch (error) {
@@ -165,6 +166,14 @@ export const updateUser = async (req, res) => {
   }
 };
 
+/**
+ * Finds a user by their username.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The user object.
+ * @throws {Object} The error object.
+ */
 export const findUser = async (req, res) => {
   try {
     const regex = new RegExp(req.params.username, "i");
