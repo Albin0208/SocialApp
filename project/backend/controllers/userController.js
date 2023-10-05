@@ -29,10 +29,10 @@ export const registerUser = async (req, res) => {
 
     res.status(201).json(user);
   } catch (error) {
-      res.status(500).json({
-        error: "Registration failed. Please try again later.",
-        message: error.message,
-      });
+    res.status(500).json({
+      error: "Registration failed. Please try again later.",
+      message: error.message,
+    });
   }
 };
 
@@ -77,13 +77,11 @@ export const loginUser = async (req, res) => {
     const userWithoutPassword = { ...user.toObject() };
     delete userWithoutPassword.password;
 
-    res
-      .status(200)
-      .json({
-        message: "Login successful",
-        accessToken,
-        user: userWithoutPassword,
-      });
+    res.status(200).json({
+      message: "Login successful",
+      accessToken,
+      user: userWithoutPassword,
+    });
   } catch (error) {
     // Handle errors, such as database errors
     res.status(500).json({ error: error.message });
@@ -134,14 +132,21 @@ export const logoutUser = (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id, "-password")
       .populate({
         path: "friends friendRequests sentRequests",
         select: "-password",
-      })
-      .select("-password"); // Get all info about the user except the password
+      }); // Get all info about the user except the password
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
     res.status(200).json(user);
   } catch (error) {
+    // Catch error when user is not valid mongoDB ObjectId
+    if (error.name === "CastError") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     res.status(500).json({ error: error.message });
   }
 };
@@ -167,7 +172,6 @@ export const findUser = async (req, res) => {
     const user = await User.find({ username: regex })
       .populate()
       .select("-password -posts");
-    // const user = await User.findOne({ username: req.params.username }).select("-password");
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
