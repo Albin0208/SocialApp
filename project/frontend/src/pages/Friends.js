@@ -1,10 +1,11 @@
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Col, Row, Card } from "react-bootstrap";
 import { useAuth } from "../utils/AuthContext";
 import { FriendRequests } from "../components/FriendRequests";
 import { SearchForm } from "../components/SearchForm";
+import Sidebar from "../components/Sidebar";
 
 export const Friends = () => {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ export const Friends = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [content, setContent] = useState("");
+  const { tab } = useParams();
 
   useEffect(() => {
     fetchUser();
@@ -36,12 +38,9 @@ export const Friends = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const response = await axiosPrivate.get(`user/username/${content}`, {
-        withCredentials: true,
-      });
-
-      const data = response.data;
-      setUsers(data);
+      const response = await axiosPrivate.get(`user/username/${content}`);
+      const result = response.data.filter(user => user._id !== currentUser._id);
+      setUsers(result);
     } catch (error) {
       console.error("Error searching for friends:", error);
     }
@@ -99,54 +98,68 @@ export const Friends = () => {
   };
 
   return (
-    <>
-      <h1>Requests</h1>
-      <FriendRequests
-        friendsData={friendRequests}
-        handleRequest={handleRequest}
-      />
-      <h1>Friends</h1>
-      <Row>
-        {friends.map(friend => (
-          <Col md={4} key={friend._id}>
-            <Card>
-              <Link
-                to={`/profile/${friend._id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <Card.Body>
-                  <Row>
-                    <Col>
-                      <Card.Title>{friend.username}</Card.Title>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Link>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      <SearchForm
-        content={content}
-        setContent={setContent}
-        handleSubmit={handleSubmit}
-      />
-
-      <h1>Friends</h1>
-      <p>Friends page</p>
-      {users.map(user => (
-        <Card key={user._id}>
-          <Link
-            to={`/profile/${user._id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <Card.Body>
-              <Card.Title>{user.username}</Card.Title>
-            </Card.Body>
-          </Link>
-        </Card>
-      ))}
-    </>
+    <Row>
+      <Col md={2} className="border-end">
+        <Sidebar />
+      </Col>
+      <Col md={10}>
+        {tab === "requests" && (
+          <>
+            <h1>Requests</h1>
+            <FriendRequests
+              friendsData={friendRequests}
+              handleRequest={handleRequest}
+            />
+          </>
+        )}
+        {tab === undefined && (
+          <>
+            <h1>Friends</h1>
+            <Row>
+              {friends.map(friend => (
+                <Col md={4} key={friend._id}>
+                  <Card>
+                    <Link
+                      to={`/profile/${friend._id}`}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <Card.Body>
+                        <Row>
+                          <Col>
+                            <Card.Title>{friend.username}</Card.Title>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Link>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </>
+        )}
+        {tab === "search" && (
+          <>
+            <h1>Find Friends</h1>
+            <SearchForm
+              content={content}
+              setContent={setContent}
+              handleSubmit={handleSubmit}
+            />
+            {users.map(user => (
+              <Card className="mb-2" key={user._id}>
+                <Link
+                  to={`/profile/${user._id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <Card.Body>
+                    <Card.Title>{user.username}</Card.Title>
+                  </Card.Body>
+                </Link>
+              </Card>
+            ))}
+          </>
+        )}
+      </Col>
+    </Row>
   );
 };

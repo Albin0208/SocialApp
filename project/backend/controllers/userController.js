@@ -12,23 +12,21 @@ import "dotenv/config";
  */
 export const registerUser = async (req, res) => {
   try {
-    const { username } = req.body;
+    const { username, password } = req.body;
 
     console.log("req.body", req.body);
     console.log("username", username);
 
-    if (!username)
-      return res.status(400).json({ error: "Username is required." });
+    if (!username || !password)
+      return res.status(400).json({ error: "Username and password is required." });
 
-    if (!req.body.password)
-      return res.status(400).json({ error: "Password is required." });
-    const password = hashPassword(req.body.password);
+    const hashedPassword = hashPassword(req.body.password);
 
     // Check if user already exists
     if (await User.findOne({ username }))
-      return res.status(400).json({ error: "Username already exists." });
+      return res.status(409).json({ error: "Username already exists." });
 
-    const user = await User.create({ username, password });
+    const user = await User.create({ username, password: hashedPassword });
 
     res.status(201).json(user);
   } catch (error) {

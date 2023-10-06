@@ -6,7 +6,10 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState({
+    loginError: null,
+    registerError: null,
+  });
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
   const [successFulRegistration, setSuccessFulRegistration] = useState(false);
@@ -15,43 +18,38 @@ export const AuthProvider = ({ children }) => {
     checkUserStatus();
   }, []);
 
-  const loginUser = async (userInfo) => {
+  const loginUser = async userInfo => {
     setLoading(true);
     try {
-      const response = await axios.post("user/login", userInfo, {
-        withCredentials: true,
-      });
-  
+      const response = await axios.post("user/login", userInfo);
+
       if (response.status === 200) {
-        // Handle successful login
+        // Successful login
         const responseData = response.data;
+
         setToken(responseData.accessToken);
-        console.log("responseData", responseData.user);
         setUser(responseData.user);
         localStorage.setItem("user", JSON.stringify(responseData.user));
-        setError(null);
-      } else {
-        // Handle login failure
-        const responseData = response.data;
-        setError(responseData.error);
-  
-        console.error("Login failed");
+        console.log("Login successful");
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      if (error.response.status === 401 || error.response.status === 404) {
+        // Unauthorized: Incorrect credentials
+        setError({ loginError: "Incorrect username or password." });
+        console.error("Login failed: Incorrect username or password.");
+      } else {
+        // Handle other response status codes
+        setError({ loginError: "An error occurred while logging in." });
+        console.error("Login failed with status code:", error.response.status);
+      }
     }
     setLoading(false);
   };
-  
+
   const logoutUser = async () => {
     try {
-      console.log("logoutUser");
+      const response = await axios.get("user/logout");
 
-      const response = await axios.get("user/logout", {
-        withCredentials: true,
-      });
-
-      console.log("response", response);
       if (response.status === 204) {
         localStorage.removeItem("user");
         setToken(null);
@@ -59,47 +57,50 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.log(error);
     }
-  
+
     setLoading(false);
   };
-  
-  const registerUser = async (userInfo) => {
-    setError(null);
+
+  const registerUser = async userInfo => {
     // Send the registration data to the server
     try {
-      const response = await axios.post("user/register", userInfo, {
-        withCredentials: true,
-      });
-  
-      if (response.status === 200) {
-        // Registration successful, you can handle the response here
-        console.log("Registration successful!");
+      const response = await axios.post("user/register", userInfo);
+
+      if (response.status === 201) {
         setSuccessFulRegistration(true);
         // TODO redirect to the login page or log in automatically
-      } else {
-        // Registration failed, handle error or show a message
-        const errorData = response.data;
-        setError(errorData.error); // Set the error message from the backend
       }
     } catch (error) {
+      console.log(error.response);
+      if (error.response.status === 400) {
+        setError({ registerError: "Username and password are required" }); // Set the error message from the backend
+      } else if (error.response.status === 409) {
+        setError({ registerError: "Username is already taken" }); // Set the error message from the backend
+      }
+
       console.error("An error occurred:", error);
     }
     setLoading(false);
   };
-  
+
   const checkUserStatus = async () => {
     setLoading(true);
     try {
       const response = await axios.get("user/refresh", {
         withCredentials: true,
       });
-  
+
       const responseData = response.data;
       setToken(responseData.accessToken);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
     setLoading(false);
+  };
+
+  const reset = () => {
+    setError({ loginError: null, registerError: null });
+    setSuccessFulRegistration(false);
   };
 
   const contextData = {
@@ -107,6 +108,7 @@ export const AuthProvider = ({ children }) => {
     setToken,
     user,
     error,
+    reset,
     successFulRegistration,
     loading,
     registerUser,

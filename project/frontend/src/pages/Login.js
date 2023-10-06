@@ -36,7 +36,7 @@ export const Login = () => {
 
   return (
     <>
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error.loginError && <Alert variant="danger">{error.loginError}</Alert>}
 
       <Form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Form.Group controlId="username" className="mb-3">

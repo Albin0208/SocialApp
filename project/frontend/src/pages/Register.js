@@ -14,13 +14,14 @@ export const Register = () => {
 
   const navigate = useNavigate();
 
-  const { token, registerUser, error, successFulRegistration } = useAuth();
+  const { token, registerUser, error, successFulRegistration,reset } = useAuth();
 
   useEffect(() => {
     if (token) {
       navigate("/");
     }
-  }, [navigate, token]);
+    reset();
+  }, []);
 
   const onSubmit = async data => {
     try {
@@ -32,7 +33,7 @@ export const Register = () => {
 
   return (
     <>
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error.registerError && <Alert variant="danger">{error.registerError}</Alert>}
       {successFulRegistration && (
         <Alert variant="success">You have successfully registered</Alert>
       )}

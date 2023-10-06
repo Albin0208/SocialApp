@@ -69,12 +69,12 @@ describe("User routes", () => {
         });
     });
 
-    it("/User/register should return 400 if username is already taken", done => {
+    it("/User/register should return 409 if username is already taken", done => {
       superagent
         .post(API_URL + "/user/register")
         .send({ username: "testuser", password: "testpassword" })
         .end((err, res) => {
-          assert.equal(res.status, 400);
+          assert.equal(res.status, 409);
           done();
         });
     });

@@ -22,11 +22,8 @@ export const Navigation = () => {
           </Nav>
           <Nav className="ms-auto">
             <NavDropdown title={"Profile"} id="basic-nav-dropdown">
-              <NavDropdown.Item as={NavLink} to={"/profile"}>
+              <NavDropdown.Item as={NavLink} to={"/profile"} end>
                 My Profile
-              </NavDropdown.Item>
-              <NavDropdown.Item as={NavLink} to={"/settings"}>
-                Settings
               </NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item onClick={logoutUser}>Logout</NavDropdown.Item>
