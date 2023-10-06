@@ -25,7 +25,7 @@ export const FriendButton = ({ profileUser, currentUser }) => {
       const response = await axiosPrivate.patch(`user/${profileUser._id}`, {
         friendRequests: [...profileUser.friendRequests, currentUser._id],
       });
-  
+
       if (response.status === 200) {
         return true;
       }
@@ -34,17 +34,17 @@ export const FriendButton = ({ profileUser, currentUser }) => {
     }
     return false;
   };
-  
+
   const withdrawFriendRequest = async () => {
     try {
       const updatedFriendRequests = profileUser.friendRequests.filter(
         request => request._id !== currentUser._id
       );
-  
+
       const response = await axiosPrivate.patch(`user/${profileUser._id}`, {
         friendRequests: updatedFriendRequests,
       });
-  
+
       if (response.status === 200) {
         return true;
       }
@@ -53,24 +53,30 @@ export const FriendButton = ({ profileUser, currentUser }) => {
     }
     return false;
   };
-  
+
   const removeFriend = async () => {
     try {
       const response = await axiosPrivate.patch(`user/${profileUser._id}`, {
         friends: profileUser.friends.filter(
-          friendId => friendId !== currentUser._id
+          friend => friend._id !== currentUser._id
         ),
       });
-  
+
       if (response.status === 200) {
-        return true;
+        // Remove the profile user from the current user's friends
+        const response = await axiosPrivate.patch(`user/${currentUser._id}`, {
+          friends: currentUser.friends.filter(
+            friend => friend._id !== profileUser._id
+          ),
+        });
+        if (response.status === 200) return true;
       }
     } catch (error) {
       console.error("Error removing friend:", error.message);
     }
     return false;
   };
-  
+
   const handleFriendRequest = async () => {
     try {
       if (buttonText === "Add Friend") {
@@ -99,8 +105,8 @@ export const FriendButton = ({ profileUser, currentUser }) => {
       console.error("An error occurred:", error.message);
     }
   };
-  
-  const updateCurrentUserSentRequests = async (action) => {
+
+  const updateCurrentUserSentRequests = async action => {
     try {
       const updatedSentRequests =
         action === "add"
@@ -108,20 +114,22 @@ export const FriendButton = ({ profileUser, currentUser }) => {
           : currentUser.sentRequests.filter(
               request => request !== profileUser._id
             );
-  
+
       const response = await axiosPrivate.patch(`user/${currentUser._id}`, {
         sentRequests: updatedSentRequests,
       });
-  
+
       if (response.status === 200) {
         return true;
       }
     } catch (error) {
-      console.error("Error updating current user's sent requests:", error.message);
+      console.error(
+        "Error updating current user's sent requests:",
+        error.message
+      );
     }
     return false;
   };
-  
 
   return (
     <Button className="w-100" variant="primary" onClick={handleFriendRequest}>

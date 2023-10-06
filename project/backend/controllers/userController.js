@@ -14,6 +14,9 @@ export const registerUser = async (req, res) => {
   try {
     const { username } = req.body;
 
+    console.log("req.body", req.body);
+    console.log("username", username);
+
     if (!username)
       return res.status(400).json({ error: "Username is required." });
 

@@ -51,9 +51,27 @@ export const Friends = () => {
     e.preventDefault();
 
     try {
+      // Get the user object of the user who recived the friend request
+      const responseUser = await axiosPrivate.get(`user/${requestId}`);
+      const friendUser = responseUser.data;
+
+      const updatedSentRequests = friendUser.sentRequests.filter(
+        friend => friend._id !== user._id
+      );
+
+      const updatedUserFriends = accept
+        ? [...friendUser.friends.map(friend => friend._id), user._id]
+        : [...friendUser.friends];
+
+      const res = await axiosPrivate.patch(`user/${friendUser._id}`, {
+        sentRequests: updatedSentRequests,
+        friends: updatedUserFriends,
+      });
+
       const updatedFriendRequests = currentUser.friendRequests.filter(
         user => user._id !== requestId
       );
+
       const updatedFriends = accept
         ? [...currentUser.friends.map(friend => friend._id), requestId]
         : [...currentUser.friends];
@@ -63,7 +81,7 @@ export const Friends = () => {
         friends: updatedFriends,
       });
 
-      if (response.data.success) {
+      if (response.status === 200) {
         fetchUser();
       } else {
         throw new Error(
