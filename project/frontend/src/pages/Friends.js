@@ -17,7 +17,7 @@ export const Friends = () => {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [tab]);
 
   const fetchUser = async () => {
     try {
@@ -100,7 +100,7 @@ export const Friends = () => {
   return (
     <Row>
       <Col md={2} className="border-end">
-        <Sidebar />
+        <Sidebar requests={friendRequests} />
       </Col>
       <Col md={10}>
         {tab === "requests" && (
