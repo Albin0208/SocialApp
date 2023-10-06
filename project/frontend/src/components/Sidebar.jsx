@@ -22,7 +22,7 @@ const Sidebar = ({requests}) => {
       >
         Friend Requests
         {requests.length > 0 && (
-          <Badge className="ms-2" pill variant="primary" rounded>
+          <Badge className="ms-2" pill variant="primary">
             {requests.length}
           </Badge>
         )}

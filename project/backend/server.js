@@ -5,6 +5,7 @@ import postRoutes from "./routes/postRoutes.js";
 import { connect } from "./database.js"; // Connect to the database
 import cookieParser from "cookie-parser";
 import { verifyJWT } from "./middleware/verifyJWT.js";
+import mongoSanitize from "express-mongo-sanitize";
 
 const app = express();
 const port = 5000;
@@ -18,6 +19,9 @@ app.use(
   })
 );
 app.use(express.json());
+
+app.use(mongoSanitize());
+
 // Middleware to parse cookies
 app.use(cookieParser())
 

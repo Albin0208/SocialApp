@@ -19,7 +19,7 @@ export const FriendRequests = ({ friendsData, handleRequest }) => {
               <Row className="mt-2">
                 <Col className="text-center">
                   <Button
-                    className="w-75"
+                    className="w-100"
                     variant="success"
                     onClick={e => handleRequest(e, friend._id, true)}
                   >
@@ -28,7 +28,7 @@ export const FriendRequests = ({ friendsData, handleRequest }) => {
                 </Col>
                 <Col className="text-center">
                   <Button
-                    className="w-75"
+                    className="w-100"
                     variant="danger"
                     onClick={e => handleRequest(e, friend._id, false)}
                   >

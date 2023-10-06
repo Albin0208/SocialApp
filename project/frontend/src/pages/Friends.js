@@ -37,6 +37,7 @@ export const Friends = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+
     try {
       const response = await axiosPrivate.get(`user/username/${content}`);
       const result = response.data.filter(user => user._id !== currentUser._id);

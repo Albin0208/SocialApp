@@ -1,17 +1,12 @@
 import mongoose from "mongoose";
 
 const postSchema = new mongoose.Schema({
-  // title: {
-  //   type: String,
-  //   required: [true, "Title is required."],
-  //   trim: true,
-  //   minLength: [3, "Title must be at least 3 characters long."],
-  // },
   content: {
     type: String,
     required: [true, "Content is required."],
     trim: true,
-    minLength: [3, "Content must be at least 3 characters long."],
+    minLength: [1, "Content must be at least 3 characters long."],
+    maxLength: [140, "Content can't be longer than 140 characters."]
   },
   createdAt: {
     type: Date,

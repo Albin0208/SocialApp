@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Alert, Row, Col } from "react-bootstrap";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { FriendButton } from "../components/FriendButton";
@@ -16,6 +16,12 @@ export const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [profileUser, setProfileUser] = useState(null);
+  const [isFriend, setIsFriend] = useState(false);
+  const navigate = useNavigate();
+
+  if (id && id === user._id) {
+    navigate("/profile")
+  }
 
   useEffect(() => {
     fetchUser();
@@ -34,6 +40,7 @@ export const Profile = () => {
 
       const data = response.data;
       setProfileUser(data);
+      setIsFriend(data.friends.some(friend => friend._id === user._id));
 
       const postIds = data.posts;
 
@@ -70,9 +77,22 @@ export const Profile = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    // Validate post content
+    if (content.trim().length < 1) {
+      setError("Post content is required.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (content.trim().length > 140) {
+      setError("Post content can't be longer than 140 characters.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await axiosPrivate.post("posts/create", {
-        content,
+        content: content.trim(),
         author: user._id,
       });
 
@@ -83,13 +103,10 @@ export const Profile = () => {
         await axiosPrivate.patch(`user/${profileUser._id}`, {
           posts: [...posts, response.data._id],
         });
-      } else {
-        console.error("Post creation failed.");
-        setError("Post creation failed.");
       }
     } catch (error) {
       console.error("An error occurred:", error.message);
-      setError(error.message);
+      setError(error.response.data.message.split("content: ")[1]);
     } finally {
       setIsLoading(false);
     }
@@ -104,21 +121,26 @@ export const Profile = () => {
         </Col>
         {id && (
           <Col md={2}>
-            <FriendButton profileUser={profileUser} currentUser={user} />
+            <FriendButton profileUser={profileUser} currentUser={user} setIsFriend={setIsFriend}/>
           </Col>
         )}
       </Row>
       <hr />
-      <CreatePost
-        handleSubmit={handleSubmit}
-        content={content}
-        setContent={setContent}
-      />
-      {isLoading && <p>Loading...</p>}
-      {error && <Alert variant="danger">{error}</Alert>}
-      {posts.map(post => (
-        <PostCard key={post._id} post={post} />
-      ))}
+
+      {(isFriend || profileUser?._id === user._id) && (
+        <>
+        <CreatePost
+          handleSubmit={handleSubmit}
+          content={content}
+          setContent={setContent}
+        />
+        
+        {isLoading && <p>Loading...</p>}
+        {error && <Alert variant="danger">{error}</Alert>}
+        {posts.map(post => (
+          <PostCard key={post._id} post={post} />
+          ))}
+        </>)}
     </>
   );
 };

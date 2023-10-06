@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { PersonCheckFill, PersonFillAdd, PersonXFill } from "react-bootstrap-icons"; // Import the third icon
 
-export const FriendButton = ({ profileUser, currentUser }) => {
+export const FriendButton = ({ profileUser, currentUser, setIsFriend }) => {
   const [buttonText, setButtonText] = useState("Add Friend");
   const axiosPrivate = useAxiosPrivate();
 
@@ -25,11 +25,42 @@ export const FriendButton = ({ profileUser, currentUser }) => {
 
   const sendFriendRequest = async () => {
     try {
+      const currUser = (await axiosPrivate.get(`user/${currentUser._id}`)).data;
+      // Check if the user we are trying to add have already sent a request to the current user, if so accept the request
+      if (
+        currUser.friendRequests.some(
+          request => request._id === profileUser._id
+        )
+      ) {
+        // Update the profile of the user who sent the request
+        const res = await axiosPrivate.patch(`user/${profileUser._id}`, {
+          friendRequests: profileUser.friendRequests.filter(
+            request => request._id !== currUser._id
+          ),
+          friends: [...profileUser.friends, currUser._id],
+        });
+
+        // Update the current user's friend requests
+        const response = await axiosPrivate.patch(`user/${currUser._id}`, {
+          friendRequests: currUser.friendRequests.filter(
+            request => request._id !== profileUser._id
+          ),
+          friends: [...currUser.friends, profileUser._id],
+        });
+
+        if (res.status === 200 && response.status === 200) {
+          setIsFriend(true);
+          setButtonText("Remove Friend");
+          return true;
+        }
+      }
+
       const response = await axiosPrivate.patch(`user/${profileUser._id}`, {
         friendRequests: [...profileUser.friendRequests, currentUser._id],
       });
 
       if (response.status === 200) {
+        setButtonText("Request Sent");
         return true;
       }
     } catch (error) {
@@ -86,7 +117,7 @@ export const FriendButton = ({ profileUser, currentUser }) => {
         if (await sendFriendRequest()) {
           // Update the current user's sent requests
           if (await updateCurrentUserSentRequests("add")) {
-            setButtonText("Request Sent");
+            // setButtonText("Request Sent");
             console.log("Friend request sent");
           }
         }
@@ -101,6 +132,7 @@ export const FriendButton = ({ profileUser, currentUser }) => {
       } else if (buttonText === "Remove Friend") {
         if (await removeFriend()) {
           setButtonText("Add Friend");
+          setIsFriend(false);
           console.log("Friend removed");
         }
       }
