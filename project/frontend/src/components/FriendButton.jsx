@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
+import { PersonCheckFill, PersonFillAdd, PersonXFill } from "react-bootstrap-icons"; // Import the third icon
 
 export const FriendButton = ({ profileUser, currentUser }) => {
   const [buttonText, setButtonText] = useState("Add Friend");
@@ -133,8 +134,19 @@ export const FriendButton = ({ profileUser, currentUser }) => {
     return false;
   };
 
+  let iconComponent;
+
+  if (buttonText === "Add Friend") {
+    iconComponent = <PersonFillAdd className="me-1 mb-1" />;
+  } else if (buttonText === "Request Sent") {
+    iconComponent = <PersonCheckFill className="me-1 mb-1" />;
+  } else if (buttonText === "Remove Friend") {
+    iconComponent = <PersonXFill className="me-1 mb-1" />;
+  }
+
   return (
     <Button className="w-100" variant="primary" onClick={handleFriendRequest}>
+      {iconComponent}
       {buttonText}
     </Button>
   );
