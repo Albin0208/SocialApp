@@ -6,6 +6,8 @@ export const FriendButton = ({ profileUser, currentUser }) => {
   const [buttonText, setButtonText] = useState("Add Friend");
   const axiosPrivate = useAxiosPrivate();
 
+  // TODO - Allow the user to accept or decline friend requests when they are on the users profile page if that user has sent them a friend request
+
   useEffect(() => {
     if (profileUser?.friends.some(friend => friend._id === currentUser._id)) {
       setButtonText("Remove Friend");
