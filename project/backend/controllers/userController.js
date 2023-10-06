@@ -18,7 +18,9 @@ export const registerUser = async (req, res) => {
     console.log("username", username);
 
     if (!username || !password)
-      return res.status(400).json({ error: "Username and password is required." });
+      return res
+        .status(400)
+        .json({ error: "Username and password is required." });
 
     const hashedPassword = hashPassword(req.body.password);
 
@@ -184,6 +186,182 @@ export const findUser = async (req, res) => {
       .populate()
       .select("-password -posts");
     res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const sendFriendRequest = async (req, res) => {
+  try {
+    const { receiverId } = req.params;
+    const { senderId } = req.body;
+
+    if (!senderId || !receiverId) {
+      return res.status(400).json({ error: "Missing parameters" });
+    }
+
+    if (senderId === receiverId) {
+      return res.status(400).json({ error: "Cannot send request to self" });
+    }
+
+    const [sender, receiver] = await Promise.all([
+      User.findById(senderId),
+      User.findById(receiverId),
+    ]);
+
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (
+      sender.friends.includes(receiverId) ||
+      receiver.friends.includes(senderId)
+    ) {
+      // Remove request from both users
+      sender.sentRequests = sender.sentRequests.filter(id => id != receiverId);
+      receiver.friendRequests = receiver.friendRequests.filter(
+        id => id != senderId
+      );
+      sender.friends = sender.friends.filter(id => id != receiverId);
+      receiver.friends = receiver.friends.filter(id => id != senderId);
+
+      await Promise.all([sender.save(), receiver.save()]);
+
+      return res.status(200).json({ message: "Friend removed" });
+    }
+
+    if (receiver.sentRequests.includes(senderId)) {
+      // Accept the request
+      sender.friends.push(receiverId);
+      receiver.friends.push(senderId);
+      sender.sentRequests = sender.sentRequests.filter(id => id != receiverId);
+      receiver.friendRequests = receiver.friendRequests.filter(
+        id => id != senderId
+      );
+
+      await Promise.all([sender.save(), receiver.save()]);
+
+      return res.status(200).json({ message: "Request accepted" });
+    }
+
+    if (sender.sentRequests.includes(receiverId)) {
+      // Withdraw the request
+      sender.sentRequests = sender.sentRequests.filter(id => id != receiverId);
+      receiver.friendRequests = receiver.friendRequests.filter(
+        id => id != senderId
+      );
+
+      await Promise.all([sender.save(), receiver.save()]);
+
+      return res.status(200).json({ message: "Request withdrawn" });
+    }
+
+    if (sender.sentRequests.includes(receiverId)) {
+      return res.status(400).json({ error: "Request already sent" });
+    }
+
+    if (sender.friendRequests.includes(receiverId)) {
+      return res.status(400).json({ error: "Request already received" });
+    }
+
+    // Send a new request
+    sender.sentRequests.push(receiverId);
+    receiver.friendRequests.push(senderId);
+
+    await Promise.all([sender.save(), receiver.save()]);
+
+    res.status(200).json({ message: "Request sent" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const acceptFriendRequest = async (req, res) => {
+  try {
+    const { senderId } = req.params;
+    const { receiverId } = req.body;
+
+    if (!senderId || !receiverId)
+      return res.status(400).json({ error: "Missing parameters" });
+
+    const [sender, receiver] = await Promise.all([
+      User.findById(senderId),
+      User.findById(receiverId),
+    ]);
+
+    if (!sender || !receiver)
+      return res.status(404).json({ error: "User not found" });
+
+    // Check if the sender actually sent a request and
+    // Check if the receiver actually received a request
+    if (
+      !sender.sentRequests.includes(receiverId) ||
+      !receiver.friendRequests.includes(senderId)
+    )
+      return res.status(400).json({ error: "No request found" });
+
+    // Check if the users are already friends
+    if (
+      sender.friends.includes(receiverId) ||
+      receiver.friends.includes(senderId)
+    )
+      return res.status(400).json({ error: "Already friends" });
+
+    sender.friends.push(receiverId);
+    receiver.friends.push(senderId);
+
+    sender.sentRequests = sender.sentRequests.filter(id => id != receiverId);
+    receiver.friendRequests = receiver.friendRequests.filter(
+      id => id != senderId
+    );
+
+    await Promise.all([sender.save(), receiver.save()]);
+
+    res.status(200).json({ message: "Request accepted" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const declineFriendRequest = async (req, res) => {
+  try {
+    const { senderId } = req.params;
+    const { receiverId } = req.body;
+
+    if (!senderId || !receiverId)
+      return res.status(400).json({ error: "Missing parameters" });
+
+    const [sender, receiver] = await Promise.all([
+      User.findById(senderId),
+      User.findById(receiverId),
+    ]);
+
+    if (!sender || !receiver)
+      return res.status(404).json({ error: "User not found" });
+
+    // Check if the sender actually sent a request and
+    // Check if the receiver actually received a request
+    if (
+      !sender.sentRequests.includes(receiverId) ||
+      !receiver.friendRequests.includes(senderId)
+    )
+      return res.status(400).json({ error: "No request found" });
+
+    // Check if the users are already friends
+    if (
+      sender.friends.includes(receiverId) ||
+      receiver.friends.includes(senderId)
+    )
+      return res.status(400).json({ error: "Already friends" });
+
+    sender.sentRequests = sender.sentRequests.filter(id => id != receiverId);
+    receiver.friendRequests = receiver.friendRequests.filter(
+      id => id != senderId
+    );
+
+    await Promise.all([sender.save(), receiver.save()]);
+
+    res.status(200).json({ message: "Request declined" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -51,42 +51,29 @@ export const Friends = () => {
     e.preventDefault();
 
     try {
-      // Get the user object of the user who recived the friend request
-      const responseUser = await axiosPrivate.get(`user/${requestId}`);
-      const friendUser = responseUser.data;
-
-      const updatedSentRequests = friendUser.sentRequests.filter(
-        friend => friend._id !== user._id
-      );
-
-      const updatedUserFriends = accept
-        ? [...friendUser.friends.map(friend => friend._id), user._id]
-        : [...friendUser.friends];
-
-      const res = await axiosPrivate.patch(`user/${friendUser._id}`, {
-        sentRequests: updatedSentRequests,
-        friends: updatedUserFriends,
-      });
-
-      const updatedFriendRequests = currentUser.friendRequests.filter(
-        user => user._id !== requestId
-      );
-
-      const updatedFriends = accept
-        ? [...currentUser.friends.map(friend => friend._id), requestId]
-        : [...currentUser.friends];
-
-      const response = await axiosPrivate.patch(`user/${user._id}`, {
-        friendRequests: updatedFriendRequests,
-        friends: updatedFriends,
-      });
+      let response;
+      if (accept) {
+        response = await axiosPrivate.post(
+          `user/${requestId}/accept-friend-request`,
+          {
+            receiverId: currentUser._id,
+          }
+        );
+      } else {
+        response = await axiosPrivate.post(
+          `user/${requestId}/decline-friend-request`,
+          {
+            receiverId: currentUser._id,
+          }
+        );
+      }
 
       if (response.status === 200) {
-        fetchUser();
-      } else {
-        throw new Error(
-          `Failed to handle friend request: ${response.data.error}`
+        // Remove the friend request from the current user's friend requests
+        const newRequests = currentUser.friendRequests.filter(
+          request => request._id !== requestId
         );
+        setCurrentUser({ ...currentUser, friendRequests: newRequests });
       }
     } catch (error) {
       console.error("Error handling friend request:", error);
@@ -131,7 +118,7 @@ export const Friends = () => {
                       <Card.Body>
                         <Row>
                           <Col>
-                            <Card.Title>{friend.username}</Card.Title>
+                            <Card.Title className="text-capitalize">{friend.username}</Card.Title>
                           </Col>
                         </Row>
                       </Card.Body>
