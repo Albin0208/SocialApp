@@ -106,6 +106,7 @@ export const Friends = () => {
         {tab === "requests" && (
           <>
             <h1>Requests</h1>
+            {friendRequests.length === 0 && <p>You have no friend requests.</p>}
             <FriendRequests
               friendsData={friendRequests}
               handleRequest={handleRequest}
@@ -116,6 +117,9 @@ export const Friends = () => {
           <>
             <h1>Friends</h1>
             <Row>
+              {friends.length === 0 && (
+                <p>You have no friends. Search for friends to add!</p>
+              )}
               {friends.map(friend => (
                 <Col md={4} key={friend._id}>
                   <Card>
@@ -145,6 +149,7 @@ export const Friends = () => {
               setContent={setContent}
               handleSubmit={handleSubmit}
             />
+            {users.length === 0 && <p>No users found.</p>}
             {users.map(user => (
               <Card className="mb-2" key={user._id}>
                 <Link
