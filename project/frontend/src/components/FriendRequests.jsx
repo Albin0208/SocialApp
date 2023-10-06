@@ -9,7 +9,7 @@ export const FriendRequests = ({ friendsData, handleRequest }) => {
             <Card.Body>
               <Row>
                 <Col>
-                  <Card.Title>{friend.username}</Card.Title>
+                  <Card.Text><span className="fw-bold text-capitalize">{friend.username}</span> has sent you a friend request</Card.Text>
                 </Col>
                 <Col>
                   <Button

@@ -47,6 +47,7 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
+
     // Find the user by username and check if the password matches
     const user = await User.findOne({ username });
 

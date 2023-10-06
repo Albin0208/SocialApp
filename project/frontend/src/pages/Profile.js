@@ -99,7 +99,7 @@ export const Profile = () => {
     <>
       <Row>
         <Col>
-          <h1>{profileUser?.username}</h1>
+          <h1 className="text-capitalize">{profileUser?.username}</h1>
           <h2>Posts</h2>
         </Col>
         {id && (
