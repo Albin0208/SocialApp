@@ -245,14 +245,14 @@ describe("User routes", () => {
       it("/User update should return 200 when the users friendRequests are updated", done => {
         const accessToken = generateAccessToken("testuser4");
         superagent
-        .patch(API_URL + "/user/" + user1Id)
-        .set("authorization", "Bearer " + accessToken)
-        .send({ friendRequests: [user2Id] })
-        .end((err, res) => {
-          assert.equal(res.status, 200);
-          done();
-        });
-      })
+          .patch(API_URL + "/user/" + user1Id)
+          .set("authorization", "Bearer " + accessToken)
+          .send({ friendRequests: [user2Id] })
+          .end((err, res) => {
+            assert.equal(res.status, 200);
+            done();
+          });
+      });
     });
   });
 
@@ -291,6 +291,22 @@ describe("User routes", () => {
           done();
         });
     });
+
+    it("should return 403 when the refresh token is expired", done => {
+      const refreshToken = jwt.sign(
+        { username: "testuser" },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: "0s" }
+      );
+
+      superagent
+        .get(API_URL + "/user/refresh")
+        .set("Cookie", "refreshToken=invalidtoken; HttpOnly; Path=/;")
+        .end((err, res) => {
+          assert.equal(res.status, 403);
+          done();
+        });
+    });
   });
 
   describe("Protected user routes", () => {
@@ -310,6 +326,22 @@ describe("User routes", () => {
           assert.equal(res.status, 403);
           done();
         });
+    });
+
+    it("should return 403 when the token is expired", done => {
+      const accessToken = jwt.sign(
+        { username: "testuser" },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "0s" }
+      );
+
+      superagent
+      .get(API_URL + "/user")
+      .set("authorization", "Bearer " + accessToken)
+      .end((err, res) => {
+        assert.equal(res.status, 403);
+        done();
+      });
     });
   });
 

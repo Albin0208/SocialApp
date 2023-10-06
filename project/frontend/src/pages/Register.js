@@ -1,4 +1,4 @@
-import { Form, Button, Row, Col, Alert } from "react-bootstrap"; // Import Alert component
+import { Form, Button, Row, Col, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
