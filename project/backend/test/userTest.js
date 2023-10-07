@@ -336,13 +336,252 @@ describe("User routes", () => {
       );
 
       superagent
-      .get(API_URL + "/user")
-      .set("authorization", "Bearer " + accessToken)
-      .end((err, res) => {
-        assert.equal(res.status, 403);
-        done();
+        .get(API_URL + "/user")
+        .set("authorization", "Bearer " + accessToken)
+        .end((err, res) => {
+          assert.equal(res.status, 403);
+          done();
+        });
+    });
+  });
+
+  describe("Friend request routes", () => {
+    describe("Sending friend requests endpoint", () => {
+      it("should return 400 when no receiverId is provided", done => {
+        const accessToken = generateAccessToken("testuser");
+        superagent
+          .post(API_URL + "/user/123/send-request")
+          .set("authorization", "Bearer " + accessToken)
+          .end((err, res) => {
+            assert.equal(res.status, 400);
+            done();
+          });
+      });
+
+      it("should return 404 when the receiver does not exist", done => {
+        const accessToken = generateAccessToken("testuser");
+        superagent
+          .post(API_URL + `/user/${new mongoose.Types.ObjectId()}/send-request`)
+          .set("authorization", "Bearer " + accessToken)
+          .send({ senderId: new mongoose.Types.ObjectId() })
+          .end((err, res) => {
+            assert.equal(res.status, 404);
+            done();
+          });
+      });
+
+      it("should return 404 when the any of the ids are invalid", done => {
+        const accessToken = generateAccessToken("testuser");
+        superagent
+          .post(API_URL + `/user/123/send-request`)
+          .set("authorization", "Bearer " + accessToken)
+          .send({ senderId: 321 })
+          .end((err, res) => {
+            assert.equal(res.status, 404);
+            done();
+          });
+      });
+
+      it("should return 400 if the user try to send a request to themselves", done => {
+        const accessToken = generateAccessToken("testuser");
+        superagent
+          .post(API_URL + `/user/123/send-request`)
+          .set("authorization", "Bearer " + accessToken)
+          .send({ senderId: 123 })
+          .end((err, res) => {
+            assert.equal(res.status, 400);
+            done();
+          });
+      });
+
+      it("should return 200 when the friend request is sent", async () => {
+        // Generate access token for the testuser
+        const accessToken = generateAccessToken("testuser");
+
+        // Fetch user1
+        const user1Response = await superagent
+          .get(API_URL + "/user/username/testuser")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user1 = user1Response.body[0];
+
+        // Fetch user2
+        const user2Response = await superagent
+          .get(API_URL + "/user/username/testuser2")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user2 = user2Response.body[0];
+
+        // Send a friend request from user1 to user2
+        const sendRequestResponse = await superagent
+          .post(API_URL + `/user/${user2._id}/send-request`)
+          .set("authorization", "Bearer " + generateAccessToken("testuser"))
+          .send({ senderId: user1._id });
+
+        // Assert that the request was successful (HTTP status code 200)
+        assert.equal(sendRequestResponse.status, 200);
+
+        // Check that the friend request was added to the receiver's friendRequests
+        const user2UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user2._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user2UpdatedResponse.body.friendRequests.length, 1);
+        assert.equal(
+          user2UpdatedResponse.body.friendRequests[0]._id,
+          user1._id
+        );
+
+        // Check that the friend request was added to the sender's sentRequests
+        const user1UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user1._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user1UpdatedResponse.body.sentRequests.length, 1);
+        assert.equal(user1UpdatedResponse.body.sentRequests[0]._id, user2._id);
+      });
+
+      it("should return 200 and set the users as friends if the the other user already sent a friend request", async () => {
+        // Generate access token for the testuser
+        const accessToken = generateAccessToken("testuser");
+
+        // Fetch user1
+        const user1Response = await superagent
+          .get(API_URL + "/user/username/testuser")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user1 = user1Response.body[0];
+
+        // Fetch user2
+        const user2Response = await superagent
+          .get(API_URL + "/user/username/testuser2")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user2 = user2Response.body[0];
+
+        // Send a friend request from user2 to user1
+        const sendRequestResponse = await superagent
+          .post(API_URL + `/user/${user1._id}/send-request`)
+          .set("authorization", "Bearer " + generateAccessToken("testuser"))
+          .send({ senderId: user2._id });
+
+        // Assert that the request was successful (HTTP status code 200)
+        assert.equal(sendRequestResponse.status, 200);
+
+        // Check that the friend request was added to the receiver's friendRequests
+        const user2UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user2._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user2UpdatedResponse.body.friendRequests.length, 0);
+        assert.equal(user2UpdatedResponse.body.friends.length, 1);
+        assert.equal(user2UpdatedResponse.body.friends[0]._id, user1._id);
+
+        // Check that the friend request was added to the sender's sentRequests
+        const user1UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user1._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user1UpdatedResponse.body.sentRequests.length, 0);
+        assert.equal(user1UpdatedResponse.body.friends.length, 1);
+        assert.equal(user1UpdatedResponse.body.friends[0]._id, user2._id);
+      });
+
+      it("should return 200 and remove the users as friends if they already are friends", async () => {
+        // Generate access token for the testuser
+        const accessToken = generateAccessToken("testuser");
+
+        // Fetch user1
+        const user1Response = await superagent
+          .get(API_URL + "/user/username/testuser")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user1 = user1Response.body[0];
+
+        // Fetch user2
+        const user2Response = await superagent
+          .get(API_URL + "/user/username/testuser2")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user2 = user2Response.body[0];
+
+        // Send a friend request from user2 to user1
+        const sendRequestResponse = await superagent
+          .post(API_URL + `/user/${user1._id}/send-request`)
+          .set("authorization", "Bearer " + generateAccessToken("testuser"))
+          .send({ senderId: user2._id });
+
+        // Assert that the request was successful (HTTP status code 200)
+        assert.equal(sendRequestResponse.status, 200);
+
+        // Check that the friend request was added to the receiver's friendRequests
+        const user2UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user2._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user2UpdatedResponse.body.friends.length, 0);
+        // Check that the friend request was added to the sender's sentRequests
+        const user1UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user1._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user1UpdatedResponse.body.friends.length, 0);
+      });
+
+      it("should return 200 and withdraw the request if the user already have sent a request to the other user", async () => {
+        // Generate access token for the testuser
+        const accessToken = generateAccessToken("testuser");
+
+        // Fetch user1
+        const user1Response = await superagent
+          .get(API_URL + "/user/username/testuser")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user1 = user1Response.body[0];
+
+        // Fetch user2
+        const user2Response = await superagent
+          .get(API_URL + "/user/username/testuser2")
+          .set("authorization", "Bearer " + accessToken);
+
+        const user2 = user2Response.body[0];
+
+        // Send a friend request from user2 to user1
+        const sendRequestResponse = await superagent
+          .post(API_URL + `/user/${user1._id}/send-request`)
+          .set("authorization", "Bearer " + generateAccessToken("testuser"))
+          .send({ senderId: user2._id });
+
+        // Assert that the request was successful (HTTP status code 200)
+        assert.equal(sendRequestResponse.status, 200);
+
+        // Send a friend request from user2 to user1, should withdraw the request
+        const withDrawResponse = await superagent
+          .post(API_URL + `/user/${user1._id}/send-request`)
+          .set("authorization", "Bearer " + generateAccessToken("testuser"))
+          .send({ senderId: user2._id });
+
+        assert.equal(withDrawResponse.status, 200);
+
+        // Check that the friend request was added to the receiver's friendRequests
+        const user2UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user2._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user2UpdatedResponse.body.sentRequests.length, 0);
+
+        // Check that the friend request was added to the sender's sentRequests
+        const user1UpdatedResponse = await superagent
+          .get(API_URL + "/user/" + user1._id)
+          .set("authorization", "Bearer " + accessToken);
+
+        assert.equal(user1UpdatedResponse.body.friendRequests.length, 0);
       });
     });
+
+    describe("Accepting friend requests endpoint", () => {});
+
+    describe("Declining friend requests endpoint", () => {});
   });
 
   describe("Logout route", () => {
