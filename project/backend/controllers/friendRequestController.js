@@ -128,13 +128,6 @@ export const acceptFriendRequest = async (req, res) => {
     )
       return res.status(400).json({ error: "No request found" });
 
-    // Check if the users are already friends
-    if (
-      sender.friends.includes(receiverId) ||
-      receiver.friends.includes(senderId)
-    )
-      return res.status(400).json({ error: "Already friends" });
-
     sender.friends.push(receiverId);
     receiver.friends.push(senderId);
 
@@ -147,6 +140,10 @@ export const acceptFriendRequest = async (req, res) => {
 
     res.status(200).json({ message: "Request accepted" });
   } catch (error) {
+    if(error.name === "CastError") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     res.status(500).json({ error: error.message });
   }
 };
@@ -187,13 +184,6 @@ export const declineFriendRequest = async (req, res) => {
     )
       return res.status(400).json({ error: "No request found" });
 
-    // Check if the users are already friends
-    if (
-      sender.friends.includes(receiverId) ||
-      receiver.friends.includes(senderId)
-    )
-      return res.status(400).json({ error: "Already friends" });
-
     sender.sentRequests = sender.sentRequests.filter(id => id != receiverId);
     receiver.friendRequests = receiver.friendRequests.filter(
       id => id != senderId
@@ -203,6 +193,10 @@ export const declineFriendRequest = async (req, res) => {
 
     res.status(200).json({ message: "Request declined" });
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     res.status(500).json({ error: error.message });
   }
 };
