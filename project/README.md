@@ -4,27 +4,25 @@ The site uses the MERN stack (MongoDB, Express, React, Node.js) to create a soci
 
 ## Table of contents
 
-- [Usage](#usage)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-    - [Automatic installation](#automatic-installation)
-    - [Manual installation](#manual-installation)
-      - [Frontend](#frontend)
-      - [Backend](#backend)
-  - [Configuration](#configuration)
-  - [.env File](#env-file)
-  - [Token Generation](#token-generation)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Automatic installation](#automatic-installation)
+  - [Manual installation](#manual-installation)
+    - [Frontend](#frontend)
+    - [Backend](#backend)
+- [Configuration](#configuration)
+- [.env File](#env-file)
+- [Token Generation](#token-generation)
 
-## Usage
 
-### Prerequisites
+## Prerequisites
 
 Before you begin setting up and running the Social App, ensure that your development environment meets the following prerequisites:
 
 1. **Node.js**: The Social App is built on Node.js. You'll need to have Node.js installed on your system. You can download Node.js from the official website: [Node.js Downloads](https://nodejs.org/en/download/).
 1. **MongoDB**: The Social App relies on MongoDB, a NoSQL database, for data storage. You'll need to have MongoDB installed and running on your system. If you don't have MongoDB installed, you can download the community edition from the official MongoDB website: [MongoDB Downloads](https://www.mongodb.com/try/download/community)
 
-### Installation
+## Installation
 
 When running the app it is assumed that you have a local instance of MongoDB running on port 27017.
 
