@@ -140,7 +140,7 @@ export const acceptFriendRequest = async (req, res) => {
 
     res.status(200).json({ message: "Request accepted" });
   } catch (error) {
-    if(error.name === "CastError") {
+    if (error.name === "CastError") {
       return res.status(404).json({ error: "User not found" });
     }
 
