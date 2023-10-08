@@ -53,7 +53,7 @@ npm run install-app
 To only start the servers run the following command:
 
 ```bash
-npm run start
+npm start
 ```
 
 ### Manual installation
