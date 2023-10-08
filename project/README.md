@@ -11,8 +11,7 @@ The site uses the MERN stack (MongoDB, Express, React, Node.js) to create a soci
     - [Manual installation](#manual-installation)
       - [Frontend](#frontend)
       - [Backend](#backend)
-  - [Troubleshooting](#troubleshooting)
-- [Configuration](#configuration)
+  - [Configuration](#configuration)
   - [.env File](#env-file)
   - [Token Generation](#token-generation)
 
