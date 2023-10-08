@@ -10,9 +10,9 @@ The site uses the MERN stack (MongoDB, Express, React, Node.js) to create a soci
   - [Manual installation](#manual-installation)
     - [Frontend](#frontend)
     - [Backend](#backend)
-- [Configuration](#configuration)
-- [.env File](#env-file)
-- [Token Generation](#token-generation)
+    - [Configuration](#configuration)
+      - [.env File](#env-file) 
+    - [Token Generation](#token-generation)
 
 
 ## Prerequisites
@@ -24,7 +24,9 @@ Before you begin setting up and running the Social App, ensure that your develop
 
 ## Installation
 
-When running the app it is assumed that you have a local instance of MongoDB running on port 27017.
+When running the app it is assumed that you have a local instance of MongoDB running on port ``27017``.
+The easiest and recommended way to install and run the app is by following the [Automatic installation](#automatic-installation) instructions.
+If you rather want to install and run the app manually follow the [Manual installation](#manual-installation) instructions.
 
 ### Automatic installation
 
@@ -34,7 +36,7 @@ To quickly set up and start the app, run the following command in your terminal:
 npm run install-and-start
 ```
 
-This command will generate the .env file, install the required dependencies and start the servers.
+This command will generate the .env file and generate and add the tokens, install the required dependencies and start the servers.
 
 To only generate the .env file run the following command:
 
@@ -106,11 +108,11 @@ npm start
 
 This will launch the backend of the application on port 5000. (http://localhost:5000/)
 
-## Configuration
+#### Configuration
 
-### .env File
+##### .env File
 
-Create a `.env` file to backend directory with the following variables and replace the values with your own:
+Create a `.env` file in the  backend directory with the following variables and replace the values with your own:
 
 ```bash
 ACCESS_TOKEN_SECRET=youraccesstokensecret
@@ -119,7 +121,7 @@ REFRESH_TOKEN_SECRET=yourrefreshtokensecret
 
 To generate the tokens follow the instructions in the [Token Generation](#token-generation) section.
 
-## Token Generation
+#### Token Generation
 
 To generate the tokens you can run the following commands in the terminal.
 
