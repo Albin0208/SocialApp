@@ -34,10 +34,6 @@ export const Chat = () => {
   }, []);
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Connected to chat");
-    });
-
     socket.on("messageResponse", msg => {
       setMessages((prev) => prev.concat(msg));
       // Scroll to the bottom of the messages container
