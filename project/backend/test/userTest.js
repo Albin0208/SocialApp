@@ -259,7 +259,7 @@ describe("User routes", () => {
   describe("Refresh token route", () => {
     it("should return 200 and a new access token", done => {
       const refreshToken = jwt.sign(
-        { username: "testuser" },
+        { user: {_id: new mongoose.Types.ObjectId(), username: "testuser"} },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: "15m" }
       );

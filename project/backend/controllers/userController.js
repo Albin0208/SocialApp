@@ -62,12 +62,12 @@ export const loginUser = async (req, res) => {
 
     // Set up jwt
     const accessToken = jwt.sign(
-      { username: user.username },
+      { user: user },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "15m" }
     );
     const refreshToken = jwt.sign(
-      { username: user.username },
+      { user: user },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "1d" }
     );

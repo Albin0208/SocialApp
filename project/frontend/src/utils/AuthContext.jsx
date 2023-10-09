@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     registerError: null,
   });
   const [token, setToken] = useState(null);
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
+  const [user, setUser] = useState({});
   const [successFulRegistration, setSuccessFulRegistration] = useState(false);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
         setToken(responseData.accessToken);
         setUser(responseData.user);
-        localStorage.setItem("user", JSON.stringify(responseData.user));
+        // localStorage.setItem("user", JSON.stringify(responseData.user));
         console.log("Login successful");
       }
     } catch (error) {
@@ -91,6 +91,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const responseData = response.data;
+      setUser(responseData.user);
       setToken(responseData.accessToken);
     } catch (error) {
       // console.log(error);

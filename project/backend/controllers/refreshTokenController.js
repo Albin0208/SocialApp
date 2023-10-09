@@ -22,11 +22,13 @@ export const handleRefreshToken = (req, res) => {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
       if (err) return res.sendStatus(403);
       const accessToken = jwt.sign(
-        { username: user.username },
+        { user: user },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "15m" }
       );
-      res.status(200).json({ accessToken });
+      
+      user = { _id: user.user._id, username: user.user.username }
+      res.status(200).json({ accessToken, user });
     });
 
   } catch (error) {
