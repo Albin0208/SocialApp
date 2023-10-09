@@ -6,8 +6,17 @@ import { connect } from "./database.js"; // Connect to the database
 import cookieParser from "cookie-parser";
 import { verifyJWT } from "./middleware/verifyJWT.js";
 import mongoSanitize from "express-mongo-sanitize";
+import { Server } from "socket.io";
+import { createServer } from "http";
+import mongoose from "mongoose";
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 const port = 5000;
 
 // Middleware
@@ -23,13 +32,37 @@ app.use(express.json());
 app.use(mongoSanitize());
 
 // Middleware to parse cookies
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Mount API routes
+io.on("connection", socket => {
+  console.log("New client connected " + socket.id);
+
+  socket.on("join", room => {
+    console.log("joining room " + room);
+    socket.join(room);
+  });
+
+  socket.on("message", (msg, room) => {
+    // const id_1 = new mongoose.Types.ObjectId().toString();
+    // const id_2 = new mongoose.Types.ObjectId().toString();
+    // console.log(id_1);
+    // console.log(id_2);
+    // console.log(id_1 > id_2);
+    // console.log(id_2 > id_1);
+    console.log(room);
+    console.log(msg);
+    io.to(room).emit("messageResponse", msg);
+  });
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
 app.use("/user", userRoutes);
+
+
 app.use(verifyJWT); // Protect all routes below this line
 app.use("/posts", postRoutes);
-
 
 /**
  * Starts the server by connecting to the database and listening on the specified port.
@@ -37,7 +70,7 @@ app.use("/posts", postRoutes);
  */
 async function startServer() {
   await connect(); // Connect to the database
-  return app.listen(port, () => {
+  return server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 }

@@ -9,6 +9,7 @@ import { AuthProvider } from "./utils/AuthContext";
 import { Profile } from "./pages/Profile.js";
 import { NotFound } from "./pages/NotFound.js";
 import { Friends } from "./pages/Friends.js";
+import { Chat } from "./pages/Chat.js";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="profile/:id?" element={<Profile />} />
             <Route path="friends/:tab?" element={<Friends />} />
+            <Route path="chat/:id" element={<Chat />} />
           </Route>
         </Route>
         <Route element={<AuthLayout />}>

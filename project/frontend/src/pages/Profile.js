@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Alert, Row, Col } from "react-bootstrap";
+import { Alert, Row, Col, Button } from "react-bootstrap";
 import useAxiosPrivate from "../utils/useAxiosPrivate";
 import { FriendButton } from "../components/FriendButton";
 import { useAuth } from "../utils/AuthContext";
@@ -134,6 +134,8 @@ export const Profile = () => {
           content={content}
           setContent={setContent}
         />
+
+        <Button onClick={() => navigate(`/chat/${profileUser._id}`)}>Chat</Button>
         
         {isLoading && <p>Loading...</p>}
         {error && <Alert variant="danger">{error}</Alert>}
