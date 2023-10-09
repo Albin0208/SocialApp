@@ -14,7 +14,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:3000",
   },
 });
 const port = 5000;
@@ -43,23 +43,18 @@ io.on("connection", socket => {
     socket.join(room);
   });
 
-  socket.on("message", (msg, room) => {
-    // const id_1 = new mongoose.Types.ObjectId().toString();
-    // const id_2 = new mongoose.Types.ObjectId().toString();
-    // console.log(id_1);
-    // console.log(id_2);
-    // console.log(id_1 > id_2);
-    // console.log(id_2 > id_1);
-    console.log(room);
-    console.log(msg);
-    io.to(room).emit("messageResponse", msg);
+  socket.on("message", payload => {
+    io.to(payload.room).emit("messageResponse", {
+      message: payload.message,
+      username: payload.username,
+      sender: payload.sender,
+    });
   });
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
 });
 app.use("/user", userRoutes);
-
 
 app.use(verifyJWT); // Protect all routes below this line
 app.use("/posts", postRoutes);

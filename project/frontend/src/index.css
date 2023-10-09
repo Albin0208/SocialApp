@@ -23,3 +23,33 @@ code {
   border: #e9ecef;
   color: black !important;
 }
+
+/* Chat message container */
+.message-container {
+  height: 500px;
+  overflow-y: scroll; /* Add this to enable scrolling */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Style for sender's chat bubble */
+.message-sender {
+  background-color: #007bff; /* Background color for sender messages */
+  color: white; /* Text color for sender messages */
+  align-self: flex-end; /* Right-align sender messages */
+  border-radius: 75px 75px 0px 75px;
+}
+
+/* Style for receiver's chat bubble */
+.message-receiver {
+  background-color: #e0e0e0; /* Background color for receiver messages */
+  color: #333; /* Text color for receiver messages */
+  align-self: flex-start; /* Left-align receiver messages */
+  border-radius: 75px 75px 75px 0px;
+}
+
+/* Style for the chat messages */
+.message {
+  padding: 0.8em;
+  word-wrap: break-word;
+}
