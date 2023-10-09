@@ -2,7 +2,7 @@ import socketIO from "socket.io-client";
 import { useEffect, useState } from "react";
 import { Button, Form, Row, Col } from "react-bootstrap";
 import { useAuth } from "../utils/AuthContext";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const socket = socketIO("http://localhost:5000");
 
@@ -12,6 +12,7 @@ export const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [room, setRoom] = useState("");
+  const navigate = useNavigate();
 
   const connectToChat = async () => {
     socket.connect();
@@ -52,6 +53,10 @@ export const Chat = () => {
   return (
     <div>
       <h1>Chat</h1>
+      <Button variant="danger" onClick={() => {
+        socket.disconnect()
+        navigate("/profile")
+        }}>Disconnect</Button>
 
       <div>
         {messages.map((msg, index) => (

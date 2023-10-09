@@ -121,6 +121,7 @@ export const Profile = () => {
         </Col>
         {id && (
           <Col md={2}>
+            <Button onClick={() => navigate(`/chat/${profileUser._id}`)}>Chat</Button>
             <FriendButton profileUser={profileUser} currentUser={user} setIsFriend={setIsFriend}/>
           </Col>
         )}
@@ -135,7 +136,6 @@ export const Profile = () => {
           setContent={setContent}
         />
 
-        <Button onClick={() => navigate(`/chat/${profileUser._id}`)}>Chat</Button>
         
         {isLoading && <p>Loading...</p>}
         {error && <Alert variant="danger">{error}</Alert>}
