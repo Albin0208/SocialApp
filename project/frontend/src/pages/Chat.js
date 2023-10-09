@@ -1,6 +1,5 @@
 import socketIO from "socket.io-client";
 import { useEffect, useState } from "react";
-import axios from "../api/axios";
 import { Button, Form, Row, Col } from "react-bootstrap";
 import { useAuth } from "../utils/AuthContext";
 import { useParams } from "react-router-dom";
@@ -14,26 +13,19 @@ export const Chat = () => {
   const [message, setMessage] = useState("");
   const [room, setRoom] = useState("");
 
-  // const startChat = async () => {
-  //   await axios.get("user/chat");
-  // }
-
-  // Generate a random room id
-
   const connectToChat = async () => {
     socket.connect();
     let r;
     if (user._id > id) {
       r = user._id + id;
-    }
-    else {
+    } else {
       r = id + user._id;
     }
 
     setRoom(r);
     console.log(room);
     socket.emit("join", r);
-  }
+  };
 
   useEffect(() => {
     connectToChat();
@@ -41,14 +33,22 @@ export const Chat = () => {
 
   useEffect(() => {
     socket.on("messageResponse", msg => {
-      console.log("message received");
       setMessages([...messages, msg]);
     });
 
     return () => {
       socket.off("messageResponse");
-    }
+    };
   }, [messages]);
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    if (message.trim() !== "") {
+      socket.emit("message", message, room);
+      setMessage("");
+    }
+  };
+
   return (
     <div>
       <h1>Chat</h1>
@@ -59,7 +59,8 @@ export const Chat = () => {
         ))}
       </div>
 
-      <Row>
+      <Form onSubmit={handleSubmit}>
+        <Row>
           <Col md={11}>
             <Form.Group>
               <Form.Control
@@ -74,19 +75,12 @@ export const Chat = () => {
             </Form.Group>
           </Col>
           <Col md={1} className="ps-md-0 mt-2 mt-md-0">
-            <Button
-              className="h-100 w-100"
-              type="submit"
-              variant="primary"
-              onClick={() => {
-                socket.emit("message", message, room);
-                setMessage("");
-              }}
-            >
+            <Button className="h-100 w-100" type="submit" variant="primary">
               Post
             </Button>
           </Col>
         </Row>
+      </Form>
     </div>
   );
 };
