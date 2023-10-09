@@ -34,13 +34,17 @@ app.use(mongoSanitize());
 // Middleware to parse cookies
 app.use(cookieParser());
 
-// Mount API routes
 io.on("connection", socket => {
-  console.log("New client connected " + socket.id);
-
   socket.on("join", room => {
-    console.log("joining room " + room);
+    console.log(`Joining room ${room}`);
     socket.join(room);
+
+    // Check if there are other clients in the room
+    const clientsInRoom = io.sockets.adapter.rooms.get(room);
+    const isOtherUserConnected = clientsInRoom && clientsInRoom.size > 1;
+
+    // Emit the "userConnected" event to the room
+    io.to(room).emit("userConnected", { connected: isOtherUserConnected });
   });
 
   socket.on("message", payload => {
@@ -50,10 +54,22 @@ io.on("connection", socket => {
       sender: payload.sender,
     });
   });
+
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach(room => {
+      console.log(`Leaving room ${room}`);
+      socket.to(room).emit("userConnected", {
+        connected: false,
+      });
+    });
+  });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
 });
+
+// Mount API routes
 app.use("/user", userRoutes);
 
 app.use(verifyJWT); // Protect all routes below this line

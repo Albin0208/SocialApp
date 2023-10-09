@@ -1,8 +1,9 @@
 import socketIO from "socket.io-client";
 import { useEffect, useState, useRef } from "react";
-import { Button, Form, Row, Col, Container } from "react-bootstrap";
+import { Button, Form, Row, Col, InputGroup } from "react-bootstrap";
 import { useAuth } from "../utils/AuthContext";
 import { useParams, useNavigate } from "react-router-dom";
+import { Send } from "react-bootstrap-icons";
 
 const socket = socketIO("http://localhost:5000");
 
@@ -12,6 +13,7 @@ export const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [room, setRoom] = useState("");
+  const [waitingForConnect, setWaitingForConnect] = useState(true);
   const navigate = useNavigate();
   const messagesRef = useRef();
 
@@ -32,15 +34,25 @@ export const Chat = () => {
   }, []);
 
   useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Connected to chat");
+    });
+
     socket.on("messageResponse", msg => {
-      setMessages([...messages, msg]);
+      setMessages((prev) => prev.concat(msg));
       // Scroll to the bottom of the messages container
       setTimeout(() => {
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       }, 0);
     });
+
+    socket.on("userConnected", status => {
+      setWaitingForConnect(!status.connected);
+    });
+
     return () => {
       socket.off("messageResponse");
+      socket.off("userConnected");
     };
   }, [messages]);
 
@@ -61,7 +73,15 @@ export const Chat = () => {
     <>
       <Row className="align-items-center">
         <Col>
-          <h3>Connected to chat</h3>
+          <h3>
+            {waitingForConnect ? (
+              <>
+              <span>Waiting for user to connect</span>
+              <span className="spinner-border spinner-border-sm ms-2"></span>
+              </>
+            ): "User connected to chat"}
+            
+            </h3>
         </Col>
         <Col className="text-end">
           <Button
@@ -76,40 +96,35 @@ export const Chat = () => {
         </Col>
       </Row>
       <hr className="mb-0" />
-      
-      <div className="message-container p-3 pb-0" ref={messagesRef}>
-  {messages.map((msg, index) => (
-    <div
-      key={index}
-      className={`message mt-2 ${msg.sender === user._id ? 'message-sender' : 'message-receiver'}`}
-    >
-      <p className="m-0">{msg.message}</p>
-    </div>
-  ))}
-</div>
 
+      <div className="message-container p-3 pb-0" ref={messagesRef}>
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`message mt-2 ${
+              msg.sender === user._id ? "message-sender" : "message-receiver"
+            }`}
+          >
+            <p className="m-0">{msg.message}</p>
+          </div>
+        ))}
+      </div>
 
       <Form onSubmit={handleSubmit} className="mt-2">
-        <Row>
-          <Col md={11}>
-            <Form.Group>
-              <Form.Control
-                type="text"
-                id="message"
-                style={{ resize: "none" }}
-                placeholder={"Say something..."}
-                aria-label="With textarea"
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-              />
-            </Form.Group>
-          </Col>
-          <Col md={1} className="ps-md-0 mt-2 mt-md-0">
-            <Button className="h-100 w-100" type="submit" variant="primary">
-              Send
-            </Button>
-          </Col>
-        </Row>
+        <InputGroup>
+          <Form.Control
+            type="text"
+            id="message"
+            style={{ resize: "none" }}
+            placeholder={"Say something..."}
+            aria-label="With textarea"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+          />
+          <Button type="submit" variant="primary" id="button-addon2">
+            <Send />
+          </Button>
+        </InputGroup>
       </Form>
     </>
   );

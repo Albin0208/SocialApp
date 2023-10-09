@@ -20,7 +20,7 @@ export const Profile = () => {
   const navigate = useNavigate();
 
   if (id && id === user._id) {
-    navigate("/profile")
+    navigate("/profile");
   }
 
   useEffect(() => {
@@ -117,32 +117,48 @@ export const Profile = () => {
       <Row>
         <Col>
           <h1 className="text-capitalize">{profileUser?.username}</h1>
-          <h2>Posts</h2>
         </Col>
         {id && (
-          <Col md={2}>
-            <Button onClick={() => navigate(`/chat/${profileUser._id}`)}>Chat</Button>
-            <FriendButton profileUser={profileUser} currentUser={user} setIsFriend={setIsFriend}/>
-          </Col>
+          <>
+            <Col md={3}>
+              <Row>
+                <Col>
+                  <Button
+                    className="w-100"
+                    onClick={() => navigate(`/chat/${profileUser._id}`)}
+                  >
+                    Start Chat
+                  </Button>
+                </Col>
+                <Col md={7} className="mt-2 mt-md-0">
+                  <FriendButton
+                    profileUser={profileUser}
+                    currentUser={user}
+                    setIsFriend={setIsFriend}
+                  />
+                </Col>
+              </Row>
+            </Col>
+          </>
         )}
       </Row>
       <hr />
 
       {(isFriend || profileUser?._id === user._id) && (
         <>
-        <CreatePost
-          handleSubmit={handleSubmit}
-          content={content}
-          setContent={setContent}
-        />
+          <CreatePost
+            handleSubmit={handleSubmit}
+            content={content}
+            setContent={setContent}
+          />
 
-        
-        {isLoading && <p>Loading...</p>}
-        {error && <Alert variant="danger">{error}</Alert>}
-        {posts.map(post => (
-          <PostCard key={post._id} post={post} />
+          {isLoading && <p>Loading...</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
+          {posts.map(post => (
+            <PostCard key={post._id} post={post} />
           ))}
-        </>)}
+        </>
+      )}
     </>
   );
 };
