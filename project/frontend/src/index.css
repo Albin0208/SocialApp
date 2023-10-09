@@ -1,22 +1,19 @@
 body {
   background-color: rgb(45, 199, 238);
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+  font-family: "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-
+/* Style for the chat list */
 .bg-light-custom {
   background-color: #f8f9fa !important; /* Background color for non-hovered state */
 }
 
+/* Style for the active and hovered chat list item */
 .bg-light-custom:hover,
 .bg-light-custom.active {
   background-color: #e9ecef !important;
@@ -38,6 +35,7 @@ code {
   color: white; /* Text color for sender messages */
   align-self: flex-end; /* Right-align sender messages */
   border-radius: 75px 75px 0px 75px;
+  margin-left: 4em;
 }
 
 /* Style for receiver's chat bubble */
@@ -46,6 +44,7 @@ code {
   color: #333; /* Text color for receiver messages */
   align-self: flex-start; /* Left-align receiver messages */
   border-radius: 75px 75px 75px 0px;
+  margin-right: 4em;
 }
 
 /* Style for the chat messages */

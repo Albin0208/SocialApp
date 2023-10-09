@@ -23,7 +23,7 @@ export const Chat = () => {
       user._id > id ? id : user._id
     }`;
     setRoom(chatRoom);
-    socket.emit("join", chatRoom);
+    socket.emit("join", chatRoom, user.username);
   };
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const Chat = () => {
 
   useEffect(() => {
     socket.on("messageResponse", msg => {
-      setMessages((prev) => prev.concat(msg));
+      setMessages(prev => prev.concat(msg));
       // Scroll to the bottom of the messages container
       setTimeout(() => {
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
@@ -72,12 +72,13 @@ export const Chat = () => {
           <h3>
             {waitingForConnect ? (
               <>
-              <span>Waiting for user to connect</span>
-              <span className="spinner-border spinner-border-sm ms-2"></span>
+                <span>Waiting for user to connect</span>
+                <span className="spinner-border spinner-border-sm ms-2"></span>
               </>
-            ): "User connected to chat"}
-            
-            </h3>
+            ) : (
+              "User connected to chat"
+            )}
+          </h3>
         </Col>
         <Col className="text-end">
           <Button
