@@ -118,7 +118,7 @@ export const Chat = () => {
               msg.sender === user._id ? "message-sender" : "message-receiver"
             }`}
           >
-            <p className="m-0">{msg.message}</p>
+            <p className="mb-0 px-2">{msg.message}</p>
           </div>
         ))}
       </div>
