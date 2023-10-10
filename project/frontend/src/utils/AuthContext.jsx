@@ -1,6 +1,7 @@
 import axios from "../api/axios";
 import { useContext, useState, useEffect, createContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { SHA256 } from "crypto-js";
 
 const AuthContext = createContext();
 
@@ -22,7 +23,14 @@ export const AuthProvider = ({ children }) => {
   const loginUser = async userInfo => {
     setLoading(true);
     try {
-      const response = await axios.post("user/login", userInfo);
+      const { password } = userInfo;
+
+      const hashedPassword = SHA256(password).toString();
+
+      const response = await axios.post("user/login", {
+        username: userInfo.username,
+        password: hashedPassword,
+      });
 
       if (response.status === 200) {
         // Successful login
@@ -65,15 +73,22 @@ export const AuthProvider = ({ children }) => {
   const registerUser = async userInfo => {
     // Send the registration data to the server
     try {
-      const response = await axios.post("user/register", userInfo);
+      const { password } = userInfo;
+
+      const hashedPassword = SHA256(password).toString();
+
+      const response = await axios.post("user/register", {
+        username: userInfo.username,
+        password: hashedPassword,
+      });
 
       if (response.status === 201) {
         setSuccessFulRegistration(true);
-        
+
         // Sets a timeout for redirecting to the login page
         setTimeout(() => {
           setSuccessFulRegistration(false);
-          navigate("/login")
+          navigate("/login");
         }, 2000);
       }
     } catch (error) {
