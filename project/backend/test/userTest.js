@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import "dotenv/config";
 import assert from "assert";
 import { closeDb, setDb, purgeDatabase } from "../database.js";
-import { startServer } from "../server.js";
+import { startServer, io } from "../server.js";
 
 let server; // Define the 'server' variable in the outer scope
 
@@ -32,6 +32,7 @@ describe("User routes", () => {
   after(async () => {
     await purgeDatabase(); // Purge the database
     closeDb(); // Close the database connection
+    io.close(); // Close the socket.io connection
     await server.close(); // Close the Express server using the 'server' variable
   });
 

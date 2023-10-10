@@ -30,7 +30,7 @@ app.use(cookieParser());
 
 // Mount API routes
 
-setupSocketServer(server);
+const io = setupSocketServer(server);
 
 app.use("/user", userRoutes);
 
@@ -48,4 +48,4 @@ async function startServer() {
   });
 }
 
-export { startServer };
+export { startServer, io };

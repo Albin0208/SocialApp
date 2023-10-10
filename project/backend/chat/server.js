@@ -45,4 +45,6 @@ export const setupSocketServer = httpServer => {
       });
     });
   });
+
+  return io;
 };
