@@ -2,7 +2,7 @@ import socketIO from "socket.io-client";
 import { useEffect, useState, useRef } from "react";
 import { Button, Form, Row, Col, InputGroup } from "react-bootstrap";
 import { useAuth } from "../utils/AuthContext";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Send } from "react-bootstrap-icons";
 
 const socket = socketIO("http://localhost:5000");
@@ -16,6 +16,8 @@ export const Chat = () => {
   const [waitingForConnect, setWaitingForConnect] = useState(true);
   const navigate = useNavigate();
   const messagesRef = useRef();
+  const [chattingWith, setChattingWith] = useState("User");
+  const { state } = useLocation();
 
   const connectToChat = async () => {
     socket.connect();
@@ -28,6 +30,8 @@ export const Chat = () => {
 
   useEffect(() => {
     connectToChat();
+    if (state?.username)
+      setChattingWith(state.username);
     return () => {
       socket.disconnect();
     };
@@ -36,6 +40,7 @@ export const Chat = () => {
   useEffect(() => {
     socket.on("messageResponse", msg => {
       setMessages(prev => prev.concat(msg));
+
       // Scroll to the bottom of the messages container
       setTimeout(() => {
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
@@ -43,6 +48,8 @@ export const Chat = () => {
     });
 
     socket.on("userConnected", status => {
+      if (status.username && status.username !== user.username)
+        setChattingWith(status.username);
       setWaitingForConnect(!status.connected);
     });
 
@@ -72,11 +79,20 @@ export const Chat = () => {
           <h3>
             {waitingForConnect ? (
               <>
-                <span>Waiting for user to connect</span>
+                <span>Waiting for</span>{" "}
+                <span className="text-capitalize">
+                  {chattingWith}
+                </span>{" "}
+                <span>to connect</span>
                 <span className="spinner-border spinner-border-sm ms-2"></span>
               </>
             ) : (
-              "User connected to chat"
+              <>
+                <span className="text-capitalize">
+                  {chattingWith}
+                </span>{" "}
+                connected to chat
+              </>
             )}
           </h3>
         </Col>

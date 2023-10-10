@@ -6,6 +6,7 @@ import { FriendButton } from "../components/FriendButton";
 import { useAuth } from "../utils/AuthContext";
 import { PostCard } from "../components/PostCard";
 import { CreatePost } from "../components/CreatePost";
+import { ChatFill } from "react-bootstrap-icons";
 
 export const Profile = () => {
   const { user } = useAuth();
@@ -112,6 +113,12 @@ export const Profile = () => {
     }
   };
 
+  const toChat = () => {
+    navigate(`/chat/${profileUser._id}`, {
+      state: { username: profileUser.username },
+    });
+  }
+  
   return (
     <>
       <Row>
@@ -119,27 +126,26 @@ export const Profile = () => {
           <h1 className="text-capitalize">{profileUser?.username}</h1>
         </Col>
         {id && (
-          <>
-            <Col md={3}>
-              <Row>
-                <Col>
-                  <Button
-                    className="w-100"
-                    onClick={() => navigate(`/chat/${profileUser._id}`)}
-                  >
-                    Start Chat
-                  </Button>
-                </Col>
-                <Col md={7} className="mt-2 mt-md-0">
-                  <FriendButton
-                    profileUser={profileUser}
-                    currentUser={user}
-                    setIsFriend={setIsFriend}
-                  />
-                </Col>
-              </Row>
-            </Col>
-          </>
+          <Col sm={5} md={6} lg={4} className="ps-0">
+            <Row>
+              <Col className="pe-0">
+                <Button
+                  className="w-100"
+                  onClick={toChat}
+                >
+                  <ChatFill className="me-1 mb-1" />
+                  Chat
+                </Button>
+              </Col>
+              <Col md={7} className="mt-2 mt-md-0">
+                <FriendButton
+                  profileUser={profileUser}
+                  currentUser={user}
+                  setIsFriend={setIsFriend}
+                />
+              </Col>
+            </Row>
+          </Col>
         )}
       </Row>
       <hr />

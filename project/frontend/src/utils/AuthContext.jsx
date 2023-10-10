@@ -1,10 +1,11 @@
 import axios from "../api/axios";
-
 import { useContext, useState, useEffect, createContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
     loginError: null,
@@ -68,7 +69,12 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 201) {
         setSuccessFulRegistration(true);
-        // TODO redirect to the login page or log in automatically
+        
+        // Sets a timeout for redirecting to the login page
+        setTimeout(() => {
+          setSuccessFulRegistration(false);
+          navigate("/login")
+        }, 2000);
       }
     } catch (error) {
       console.log(error.response);

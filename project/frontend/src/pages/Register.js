@@ -35,7 +35,7 @@ export const Register = () => {
     <>
       {error.registerError && <Alert variant="danger">{error.registerError}</Alert>}
       {successFulRegistration && (
-        <Alert variant="success">You have successfully registered</Alert>
+        <Alert variant="success">You are now registered and will be redirected in 2 seconds</Alert>
       )}
 
       <Form onSubmit={handleSubmit(onSubmit)}>

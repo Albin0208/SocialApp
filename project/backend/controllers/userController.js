@@ -14,9 +14,6 @@ export const registerUser = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    console.log("req.body", req.body);
-    console.log("username", username);
-
     if (!username || !password)
       return res
         .status(400)

@@ -59,17 +59,21 @@ export const FriendButton = ({ profileUser, currentUser, setIsFriend }) => {
   };
 
   let iconComponent;
+  let buttonVariant;
 
   if (buttonText === "Add Friend") {
     iconComponent = <PersonFillAdd className="me-1 mb-1" />;
+    buttonVariant = "primary";
   } else if (buttonText === "Request Sent") {
     iconComponent = <PersonCheckFill className="me-1 mb-1" />;
+    buttonVariant = "secondary";
   } else if (buttonText === "Remove Friend") {
     iconComponent = <PersonXFill className="me-1 mb-1" />;
+    buttonVariant = "danger";
   }
 
   return (
-    <Button className="w-100" variant="primary" onClick={handleFriendRequest}>
+    <Button className="w-100" variant={buttonVariant} onClick={handleFriendRequest}>
       {iconComponent}
       {buttonText}
     </Button>

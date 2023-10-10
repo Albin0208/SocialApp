@@ -6,7 +6,6 @@ import { connect } from "./database.js"; // Connect to the database
 import cookieParser from "cookie-parser";
 import { verifyJWT } from "./middleware/verifyJWT.js";
 import mongoSanitize from "express-mongo-sanitize";
-import { Server } from "socket.io";
 import { createServer } from "http";
 import { setupSocketServer } from "./chat/server.js";
 
@@ -28,41 +27,6 @@ app.use(mongoSanitize());
 
 // Middleware to parse cookies
 app.use(cookieParser());
-
-// io.on("connection", socket => {
-//   socket.on("join", room => {
-//     console.log(`Joining room ${room}`);
-//     socket.join(room);
-
-//     // Check if there are other clients in the room
-//     const clientsInRoom = io.sockets.adapter.rooms.get(room);
-//     const isOtherUserConnected = clientsInRoom && clientsInRoom.size > 1;
-
-//     // Emit the "userConnected" event to the room
-//     io.to(room).emit("userConnected", { connected: isOtherUserConnected });
-//   });
-
-//   socket.on("message", payload => {
-//     io.to(payload.room).emit("messageResponse", {
-//       message: payload.message,
-//       username: payload.username,
-//       sender: payload.sender,
-//     });
-//   });
-
-//   socket.on("disconnecting", () => {
-//     socket.rooms.forEach(room => {
-//       console.log(`Leaving room ${room}`);
-//       socket.to(room).emit("userConnected", {
-//         connected: false,
-//       });
-//     });
-//   });
-
-//   socket.on("disconnect", () => {
-//     console.log("Client disconnected");
-//   });
-// });
 
 // Mount API routes
 
