@@ -95,7 +95,7 @@ router
       .catch(error => {
         logError(error);
         res
-          .status(500)
+          .status(400)
           .json({ error: "Failed to fetch message", message: error.message });
       });
   })
@@ -124,7 +124,7 @@ router
       .catch(error => {
         logError(error);
         res
-          .status(500)
+          .status(400)
           .json({ error: "Could not update message", message: error.message });
       });
   });

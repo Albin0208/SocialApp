@@ -26,12 +26,12 @@ describe("User routes", () => {
   before(async () => {
     setDb("testdb"); // Set the database to test mode
     server = await startServer(); // Start the Express server and assign it to 'server'
-    await purgeDatabase(); // Purge the database
+    // await purgeDatabase(); // Purge the database
   });
 
   after(async () => {
     await purgeDatabase(); // Purge the database
-    closeDb(); // Close the database connection
+    await closeDb(); // Close the database connection
     console.log("Closing io...");
     io.close(); // Close the socket.io connection
     await server.close(); // Close the Express server using the 'server' variable

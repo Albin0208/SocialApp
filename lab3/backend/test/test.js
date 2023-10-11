@@ -76,7 +76,7 @@ describe("server API test", () => {
 
     it("/GET. Try getting tweet with invalid id", done => {
       superagent.get(api + "/messages/" + "123").end((err, res) => {
-        assert.equal(res.status, 500);
+        assert.equal(res.status, 400);
         done();
       });
     });
@@ -217,7 +217,7 @@ describe("server API test", () => {
       });
     });
 
-    it("/PATCH. Update a tweet with wrong input should return 500", done => {
+    it("/PATCH. Update a tweet with wrong input should return 400", done => {
       insertOne({
         message: "Hello World",
         author: "Test",
@@ -230,7 +230,7 @@ describe("server API test", () => {
             read: "true",
           })
           .end((err, res) => {
-            assert.equal(res.status, 500);
+            assert.equal(res.status, 400);
             done();
           });
       });
@@ -266,7 +266,7 @@ describe("server API test", () => {
             read: true,
           })
           .end((err, res) => {
-            assert.equal(res.status, 500);
+            assert.equal(res.status, 400);
             done();
           });
       });
@@ -290,7 +290,7 @@ describe("server API test", () => {
   });
 
   describe("Test mongo injection", () => {
-    it("/POST. Post a message with mongo injection should return 500", done => {
+    it("/POST. Post a message with mongo injection should return 400", done => {
       superagent
         .post(api + "/messages")
         .send({
@@ -299,12 +299,12 @@ describe("server API test", () => {
           $where: "function() {return (this.product == “Milk”)}",
         })
         .end((err, res) => {
-          assert.equal(res.status, 500);
+          assert.equal(res.status, 400);
           done();
         });
     });
 
-    it("/PATCH. Update a tweet with mongo injection should return 500", done => {
+    it("/PATCH. Update a tweet with mongo injection should return 400", done => {
       superagent
         .patch(api + "/messages/5f9b3b3b3b3b3b3b3b3b3b3b")
         .send({
@@ -312,7 +312,7 @@ describe("server API test", () => {
           $where: "function() {return (this.product == “Milk”)}",
         })
         .end((err, res) => {
-          assert.equal(res.status, 500);
+          assert.equal(res.status, 400);
           done();
         });
     });

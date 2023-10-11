@@ -40,7 +40,7 @@ describe("Post routes", () => {
 
   after(async () => {
     await purgeDatabase();
-    closeDb();
+    await closeDb();
     io.close()
     await server.close();
     console.log("Server closed");

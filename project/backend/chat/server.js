@@ -46,12 +46,6 @@ export const setupSocketServer = httpServer => {
     });
   });
 
-  io.on("close", () => {
-    // Kill all active connections
-    console.log("Closing socket serveroo");
-    io.sockets.sockets.forEach(socket => socket.disconnect(true));
-  })
-
   return io;
 };
 

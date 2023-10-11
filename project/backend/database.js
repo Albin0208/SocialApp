@@ -47,12 +47,8 @@ const setDb = name => {
  */
 const purgeDatabase = async () => {
   // Get a list of all collection names in the database
-  const collections = await mongoose.connection.db.collections();
+  const collections = await mongoose.connection.db.dropDatabase();
 
-  // Loop through the collections and drop each one
-  for (const collection of collections) {
-    await collection.drop();
-  }
 
   console.log(`All collections in ${dbName} database have been purged.`);
 };
