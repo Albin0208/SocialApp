@@ -3,6 +3,6 @@
     "install-app": "cd backend && npm install && cd ../frontend && npm install",
     "generate-env": "node setup-project.mjs --generate-env",
     "start": "node setup-project.mjs --start-servers",
-    "install-and-start": "npm run install-app && npm run generate-env && npm run start-servers"
+    "install-and-start": "npm run install-app && npm run generate-env && npm run start"
   }
 }
