@@ -32,7 +32,7 @@ router
   })
   .post((req, res) => {
     if (mongoSanitize.has(req.body)) {
-      return res.status(500).json({ error: "Invalid input" });
+      return res.status(400).json({ error: "Invalid input" });
     }
 
     // Deconstruct the message object
@@ -101,7 +101,7 @@ router
   })
   .patch((req, res) => {
     if (mongoSanitize.has(req.body)) {
-      return res.status(500).json({ error: "Invalid input" });
+      return res.status(400).json({ error: "Invalid input" });
     }
 
     if (typeof req.body.read !== "boolean") {
