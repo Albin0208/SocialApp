@@ -1,4 +1,5 @@
 import Post from "../models/postModel.js";
+import User from "../models/userModel.js";
 
 /**
  * Retrieves all posts from the database.
@@ -28,7 +29,27 @@ export const getPosts = async (req, res) => {
  */
 export const createPost = async (req, res) => {
   try {
-    const { content, author } = req.body;
+    const { content, author, receiver } = req.body;
+
+    if (!content || !author) {
+      return res.status(400).json({
+        message: "Missing parameters",
+      });
+    }
+
+    // Fetch the author and the receiver from the database
+    const [authorUser, receiverUser] = await Promise.all([
+      User.findById(author),
+      User.findById(receiver),
+    ]);
+    
+    // Check if the author and receiver are friends
+    if (!authorUser.friends.includes(receiver)) {
+      return res.status(400).json({
+        message: "You can only post on your friends' walls",
+      });
+    }
+
     const newPost = await Post.create({ content, author });
     res.status(201).json(newPost);
   } catch (error) {

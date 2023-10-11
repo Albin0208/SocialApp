@@ -32,8 +32,11 @@ describe("User routes", () => {
   after(async () => {
     await purgeDatabase(); // Purge the database
     closeDb(); // Close the database connection
+    console.log("Closing io...");
     io.close(); // Close the socket.io connection
     await server.close(); // Close the Express server using the 'server' variable
+    console.log("Closing server...");
+    console.log("Server closed.");
   });
 
   describe("/User/register", () => {
@@ -421,7 +424,7 @@ describe("User routes", () => {
         const sendRequestResponse = await superagent
           .post(API_URL + `/user/${user2._id}/send-request`)
           .set("authorization", "Bearer " + generateAccessToken("testuser"))
-          .send({ senderId: user1._id });
+          .send({ senderId: user1._id, state: "send" });
         assert.equal(sendRequestResponse.status, 200);
 
         // Check that the friend request was added to the receiver's friendRequests
@@ -447,7 +450,7 @@ describe("User routes", () => {
         const sendRequestResponse = await superagent
           .post(API_URL + `/user/${user1._id}/send-request`)
           .set("authorization", "Bearer " + generateAccessToken("testuser"))
-          .send({ senderId: user2._id });
+          .send({ senderId: user2._id, state: "send" });
         assert.equal(sendRequestResponse.status, 200);
 
         // Check that the friend request was added to the receiver's friendRequests
@@ -472,7 +475,7 @@ describe("User routes", () => {
         const sendRequestResponse = await superagent
           .post(API_URL + `/user/${user1._id}/send-request`)
           .set("authorization", "Bearer " + generateAccessToken("testuser"))
-          .send({ senderId: user2._id });
+          .send({ senderId: user2._id, state: "remove" });
         assert.equal(sendRequestResponse.status, 200);
 
         // Check that the friend request was added to the receiver's friendRequests
@@ -493,14 +496,14 @@ describe("User routes", () => {
         const sendRequestResponse = await superagent
           .post(API_URL + `/user/${user1._id}/send-request`)
           .set("authorization", "Bearer " + generateAccessToken("testuser"))
-          .send({ senderId: user2._id });
+          .send({ senderId: user2._id, state: "send" });
         assert.equal(sendRequestResponse.status, 200);
 
         // Send a friend request from user2 to user1 again, should withdraw the request
         const withDrawResponse = await superagent
           .post(API_URL + `/user/${user1._id}/send-request`)
           .set("authorization", "Bearer " + generateAccessToken("testuser"))
-          .send({ senderId: user2._id });
+          .send({ senderId: user2._id, state: "withdraw" });
         assert.equal(withDrawResponse.status, 200);
 
         // Check that the friend request was added to the receiver's friendRequests
@@ -601,7 +604,7 @@ describe("User routes", () => {
         const sendRequestResponse = await superagent
           .post(API_URL + `/user/${userId}/send-request`)
           .set("authorization", "Bearer " + accessToken)
-          .send({ senderId: userId2 });
+          .send({ senderId: userId2, state: "send" });
         assert.equal(sendRequestResponse.status, 200);
 
         const acceptRequestResponse = await superagent
@@ -728,7 +731,7 @@ describe("User routes", () => {
         const sendRequestResponse = await superagent
           .post(API_URL + `/user/${userId}/send-request`)
           .set("authorization", "Bearer " + accessToken)
-          .send({ senderId: userId2 });
+          .send({ senderId: userId2, state: "send" });
         assert.equal(sendRequestResponse.status, 200);
 
         // Decline the friend request from user 1 to user 2
@@ -775,4 +778,6 @@ describe("User routes", () => {
         });
     });
   });
+
+
 });

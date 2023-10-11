@@ -95,6 +95,7 @@ export const Profile = () => {
       const response = await axiosPrivate.post("posts/create", {
         content: content.trim(),
         author: user._id,
+        receiver: profileUser._id,
       });
 
       if (response.status === 201) {

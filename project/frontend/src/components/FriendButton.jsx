@@ -27,10 +27,17 @@ export const FriendButton = ({ profileUser, currentUser, setIsFriend }) => {
 
   const handleFriendRequest = async () => {
     try {
+      let state = "send";
+      if (buttonText === "Remove Friend") {
+        state = "remove";
+      } else if (buttonText === "Request Sent") {
+        state = "withdraw";
+      }
       const response = await axiosPrivate.post(
         `user/${profileUser._id}/send-request`,
         {
           senderId: currentUser._id,
+          state
         }
       );
 
