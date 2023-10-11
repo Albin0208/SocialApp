@@ -106,7 +106,7 @@ router
 
     if (typeof req.body.read !== "boolean") {
       return res
-        .status(500)
+        .status(400)
         .json({ error: "Invalid read value, expected value of type bool" });
     }
     update({ _id: req.params.id, read: req.body.read })
