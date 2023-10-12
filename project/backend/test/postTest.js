@@ -41,7 +41,7 @@ describe("Post routes", () => {
   after(async () => {
     await purgeDatabase();
     await closeDb();
-    io.close()
+    io.close();
     await server.close();
     console.log("Server closed");
   });
@@ -102,6 +102,33 @@ describe("Post routes", () => {
           done();
         });
     });
+
+    it("should return 400 when the users are not friends", async () => {
+      // Create a new user that is not friends with user1
+      const user3 = await User.create({
+        username: "testuser3",
+        password: "testpassword",
+      });
+
+      await user3.save();
+
+      const newPost = {
+        content: "This is a test post.",
+        author: user1._id,
+        receiver: user3._id,
+      };
+
+      const accessToken = generateAccessToken("testuser");
+
+      try {
+        await superagent
+          .post(API_URL + "/posts/create")
+          .set("authorization", "Bearer " + accessToken)
+          .send(newPost);
+      } catch (error) {
+        assert.equal(error.response.status, 400);
+      }
+    });
   });
 
   describe("Get posts", () => {
@@ -154,12 +181,12 @@ describe("Post routes", () => {
       const accessToken = generateAccessToken("testuser");
 
       superagent
-      .get(API_URL + "/posts/123")
-      .set("authorization", "Bearer " + accessToken)
-      .end((err, res) => {
-        assert.equal(res.status, 404);
-        done();
-      });
-    })
+        .get(API_URL + "/posts/123")
+        .set("authorization", "Bearer " + accessToken)
+        .end((err, res) => {
+          assert.equal(res.status, 404);
+          done();
+        });
+    });
   });
 });
