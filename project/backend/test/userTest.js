@@ -26,7 +26,7 @@ describe("User routes", () => {
   before(async () => {
     setDb("testdb"); // Set the database to test mode
     server = await startServer(); // Start the Express server and assign it to 'server'
-    // await purgeDatabase(); // Purge the database
+    await purgeDatabase(); // Purge the database
   });
 
   after(async () => {
