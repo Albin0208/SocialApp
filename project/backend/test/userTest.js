@@ -263,7 +263,7 @@ describe("User routes", () => {
   describe("Refresh token route", () => {
     it("should return 200 and a new access token", done => {
       const refreshToken = jwt.sign(
-        { user: {_id: new mongoose.Types.ObjectId(), username: "testuser"} },
+        { user: { _id: new mongoose.Types.ObjectId(), username: "testuser" } },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: "15m" }
       );
@@ -372,6 +372,17 @@ describe("User routes", () => {
           .set("authorization", "Bearer " + accessToken);
         assert.equal(user2Response.status, 200);
         user2 = user2Response.body[0];
+      });
+
+      it("should return 400 if a invalid state is passed", async () => {
+        try {
+          await superagent
+            .post(API_URL + `/user/${user2._id}/send-request`)
+            .set("authorization", "Bearer " + accessToken)
+            .send({ senderId: user1._id, state: "invalidstate" });
+        } catch (err) {
+          assert.equal(err.response.status, 400);
+        }
       });
 
       it("should return 400 when no receiverId is provided", async () => {
@@ -778,6 +789,4 @@ describe("User routes", () => {
         });
     });
   });
-
-
 });
