@@ -32,52 +32,55 @@ export const sendFriendRequest = async (req, res) => {
     }
 
     // Check the state of the request
-    if (state === "send") {
-      // Check if the other user has already sent a request if so we accept
-      if (receiver.sentRequests.includes(senderId)) {
-        // Accept the request
-        sender.friends.push(receiverId);
-        receiver.friends.push(senderId);
-        // Remove the request from both users
-        sender.friendRequests = sender.friendRequests.filter(
+    switch (state) {
+      case "send":
+        // Check if the other user has already sent a request if so we accept
+        if (receiver.sentRequests.includes(senderId)) {
+          // Accept the request
+          sender.friends.push(receiverId);
+          receiver.friends.push(senderId);
+          // Remove the request from both users
+          sender.friendRequests = sender.friendRequests.filter(
+            id => id != receiverId
+          );
+          receiver.sentRequests = receiver.sentRequests.filter(
+            id => id != senderId
+          );
+
+          await Promise.all([sender.save(), receiver.save()]);
+
+          return res.status(200).json({ message: "Request accepted" });
+        }
+
+        // Add the request to both users
+        sender.sentRequests.push(receiverId);
+        receiver.friendRequests.push(senderId);
+
+        await Promise.all([sender.save(), receiver.save()]);
+        return res.status(200).json({ message: "Request sent" });
+      case "withdraw":
+        // Withdraw the request
+        sender.sentRequests = sender.sentRequests.filter(
           id => id != receiverId
         );
-        receiver.sentRequests = receiver.sentRequests.filter(
+        receiver.friendRequests = receiver.friendRequests.filter(
           id => id != senderId
         );
 
         await Promise.all([sender.save(), receiver.save()]);
 
-        return res.status(200).json({ message: "Request accepted" });
-      }
+        return res.status(200).json({ message: "Request withdrawn" });
+      case "remove":
+        sender.friends = sender.friends.filter(id => id != receiverId);
+        receiver.friends = receiver.friends.filter(id => id != senderId);
 
-      // Add the request to both users
-      sender.sentRequests.push(receiverId);
-      receiver.friendRequests.push(senderId);
+        await Promise.all([sender.save(), receiver.save()]);
 
-      await Promise.all([sender.save(), receiver.save()]);
-      return res.status(200).json({ message: "Request sent" });
-    } else if (state === "withdraw") {
-      // Withdraw the request
-      sender.sentRequests = sender.sentRequests.filter(id => id != receiverId);
-      receiver.friendRequests = receiver.friendRequests.filter(
-        id => id != senderId
-      );
-
-      await Promise.all([sender.save(), receiver.save()]);
-
-      return res.status(200).json({ message: "Request withdrawn" });
-    } else if (state === "remove") {
-      sender.friends = sender.friends.filter(id => id != receiverId);
-      receiver.friends = receiver.friends.filter(id => id != senderId);
-
-      await Promise.all([sender.save(), receiver.save()]);
-
-      return res.status(200).json({ message: "Friend removed" });
+        return res.status(200).json({ message: "Friend removed" });
+      default:
+        // If we get here the state is invalid
+        return res.status(400).json({ error: "Invalid state" });
     }
-
-    // If we get here the state is invalid
-    return res.status(400).json({ error: "Invalid state" });
   } catch (error) {
     if (error.name === "CastError") {
       return res.status(404).json({ error: "User not found" });
