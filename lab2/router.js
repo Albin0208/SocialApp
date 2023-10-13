@@ -7,7 +7,6 @@ import {
   getOne,
   insertOne,
   update,
-  purgeDatabase,
 } from "./database.js";
 
 const router = express.Router();
@@ -33,8 +32,9 @@ router
   })
   .post((req, res) => {
     if (mongoSanitize.has(req.body)) {
-      return res.status(500).json({ error: "Invalid input" });
+      return res.status(400).json({ error: "Invalid input" });
     }
+
     // Deconstruct the message object
     const { message, author, read } = req.body;
 
@@ -95,18 +95,18 @@ router
       .catch(error => {
         logError(error);
         res
-          .status(500)
+          .status(400)
           .json({ error: "Failed to fetch message", message: error.message });
       });
   })
   .patch((req, res) => {
     if (mongoSanitize.has(req.body)) {
-      return res.status(500).json({ error: "Invalid input" });
+      return res.status(400).json({ error: "Invalid input" });
     }
 
     if (typeof req.body.read !== "boolean") {
       return res
-        .status(500)
+        .status(400)
         .json({ error: "Invalid read value, expected value of type bool" });
     }
     update({ _id: req.params.id, read: req.body.read })
@@ -124,7 +124,7 @@ router
       .catch(error => {
         logError(error);
         res
-          .status(500)
+          .status(400)
           .json({ error: "Could not update message", message: error.message });
       });
   });
